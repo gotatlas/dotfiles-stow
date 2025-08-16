@@ -1,0 +1,4 @@
+keycode 66 = Hyper_L
+add Mod3 = Hyper_L
+keycode 133 = Super_L
+keycode 134 = Super_R

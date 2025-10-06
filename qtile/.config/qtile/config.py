@@ -16,6 +16,8 @@ from libqtile.command.base import expose_command
 from libqtile.log_utils import logger
 # Requires Qtile Extras
 from qtile_extras import widget as extra_widget 
+# Custom Layouts
+# from layout_top_tabs import TopTabs
 
 # === Global Variables ===
 mod = "mod4"
@@ -153,6 +155,14 @@ def _disable_pip():
     w = qtile.windows_map.get(PIP_WID) if PIP_WID is not None else None
     _PIP_ACTIVE = False
     PIP_WID = None
+
+    # PIP_SIZE = 0.30
+    # PIP_MARGIN = 16
+    # PIP_CORNER = "br"
+
+    # PIP_VISIBLE = True
+    # PIP_OFFSET = None
+    # PIP_FIXED_SIZE = None
     if w:
         try:
             w.disable_floating()
@@ -319,10 +329,18 @@ def _check_pip_winodw_state():
         
 @hook.subscribe.client_killed
 def _cleanup_pip(window):
-    global PIP_WID, _PIP_ACTIVE
+    global PIP_WID, _PIP_ACTIVE #, PIP_SIZE, PIP_MARGIN, PIP_CORNER, PIP_VISIBLE, PIP_OFFSET, PIP_FIXED_SIZE
     if window.wid == PIP_WID:
         PIP_WID = None
         _PIP_ACTIVE = False
+        # PIP_SIZE = 0.30
+        # PIP_MARGIN = 16
+        # PIP_CORNER = "br"
+
+        # PIP_VISIBLE = True
+        # PIP_OFFSET = None
+        # PIP_FIXED_SIZE = None
+
 
 # Universal Switch Layout Function
 @lazy.function
@@ -617,6 +635,7 @@ keys_arr = [
     ([mod, "control"], "q", lazy.shutdown(),    "Shutdown Qtile"),
     # Custom
     ([mod], "p", lazy.spawn("rofi -show drun"), "powermenu"),
+    ([mod], "d", lazy.spawn("rofi -show drun"), "powermenu alt binding"),
     ([mod], "l", lazy.spawn("betterlockscreen -l"), "lockscreen"),
     ([mod], "m", lazy.window.togroup("scratchpad", switch_group=False), "Minimize with scratchpad"),
     (
@@ -756,10 +775,22 @@ tree_tab_theme = {
     "urgent_bg": colors["red"],
     "place_right": True,
     "margin_left": 2,
+    "margin_right": 2,
     "vspace": 2,
     "panel_width": 95,
     "sections": ["Main", "Misc"],
-    "name": layout_display_names["treetab"]
+    "name": layout_display_names["treetab"],
+    "font":"JetBrainsMono Nerd Font",
+    "fontsize":11,              # smaller text fewer overflows
+    "section_fg_color":"#c0c0c0",
+    "section_fontsize":10,
+    # spacing
+    "padding_left":6,           # trim left gutter
+    "padding_x":6,              # trim horizontal padding per entry
+    "padding_y":4,
+    # "vspace":4,                 # vertical spacing between rows
+    # behavior
+    "previous_on_rm":True,      # focus previous when closing
 }
 
 floating_theme = {
@@ -896,15 +927,36 @@ layouts = [
     # layout.Stack(num_stacks=2),
     # layout.Matrix(**layout_theme),
     layout.MonadTall(**layout_theme, ratio=0.7, name=layout_display_names["monadtall"]),
+    # TopTabs(
+    #     tab_height=26,
+    #     font="JetBrainsMono Nerd Font",
+    #     fontsize=12,
+    #     padding=10,
+    #     bg="#1e1e2e",
+    #     tab_active_bg="#44475a",
+    #     tab_inactive_bg="#2b2e3b",
+    #     fg_active="#ffffff",
+    #     fg_inactive="#c0c0c0",
+    #     margin=6,
+    #     border_width=0,
+    # ),
     # layout.MonadTall(**layout_theme, ratio=0.7, align=layout.MonadTall._left),
     # Monad(**layout_theme),
     # layout.MonadWide(**layout_theme),
+    
     # layout.RatioTile(**layout_theme),
     # layout.Tile(**tile_theme),
+    # layout.VerticalTile(**layout_theme),
+    # layout.ScreenSplit(**layout_theme),
+
+    # layout.Slice(**layout_theme),
+
+    # layout.Tabs(**layout_theme),
     layout.TreeTab(**tree_tab_theme),
     layout.Max(**max_theme),
     layout.Bsp(**layout_theme, name=layout_display_names["bsp"]),
-    # layout.VerticalTile(**layout_theme),
+    # layout.Plasma(**layout_theme),
+    
     # layout.Zoomy(**layout_theme),
 ]
 

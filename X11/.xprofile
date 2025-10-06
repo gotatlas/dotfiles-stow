@@ -5,5 +5,5 @@ export XCURSOR_THEME=Dracula-cursors
 export XDG_CURRENT_DESKTOP=Qtile
 export DESKTOP_SESSION=qtile
 # setxkbmap -option caps:hyper
-xinput set-prop "ELAN0788:00 04F3:321A Touchpad" "libinput Natural Scrolling Enabled" 1
-xmodmap ~/.Xmodmap
+# xinput set-prop "ELAN0788:00 04F3:321A Touchpad" "libinput Natural Scrolling Enabled" 1
+# xmodmap ~/.Xmodmap

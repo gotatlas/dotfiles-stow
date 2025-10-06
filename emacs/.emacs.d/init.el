@@ -3,17 +3,16 @@
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 
+(setq display-line-numbers-type t)
 (global-display-line-numbers-mode t)
 (global-visual-line-mode 1)
 
 (setq-default indent-tabs-mode nil)
-(setq-default tab-width 2)
+(setq-default tab-width 4)
+(setq tab-always-indent 'complete)
 
+(electric-pair-mode 1) 
 (delete-selection-mode 1)
-(setq delete-selection-save-to-kill-ring nil)
-;; (add-hook 'dired-mode-hook
-;;           (lambda ()
-;;             (setq-local delete-selection-save-to-kill-ring nil)))
 
 ;; Smooth Scrolling
 (setq scroll-margin 5
@@ -23,7 +22,8 @@
 (global-auto-revert-mode t)
 
 (setq inhibit-startup-screen t)
-(setq initial-buffer-choice t)
+
+(setq initial-buffer-choice nil) ;; was t
 
 ;(defalias 'yes-or-no-p (lambda (&rest args) t))
 ;(defalias 'y-or-n-p (lambda (&rest args) t))
@@ -39,7 +39,14 @@
                   (make-directory dir t))))))
 
 ;; Set Hyperkey if not done for system
-;;(define-key key-translation-map (kbd "<capslock>") (kbd "H-"))
+;; (define-key key-translation-map (kbd "<Multi_key>") (kbd "H-"))
+;; (define-key key-translation-map (kbd "<XF86CapsLock>") 'event-apply-hyper-modifier)
+
+;; (global-set-key (kbd "C-c h") #'event-apply-hyper-modifier) ; C-c h f => H-f
+;; Wayland Hyperkey
+;; (define-key key-translation-map (kbd "<caps>") 'event-apply-hyper-modifier)
+;; (define-key input-decode-map (kbd "<Hyper_L>") (kbd "H-"))
+;; (define-key input-decode-map (kbd "<hyper>") (kbd "H-"))
 
 ;; Rebind Macro
 (defmacro rebind (&rest bindings)
@@ -72,9 +79,26 @@
       (package-refresh-contents))
     (package-install package)))
 
+;; Managing autosaves and backupfiles
+;; Put all backup files in ~/.emacs.d/backups/<full/path/to/file>
+(setq backup-directory-alist
+      `(("." . ,(expand-file-name "backups/" user-emacs-directory))))
+
+;; Use versioned backups (foo.txt~, foo.txt~~, …)
+(setq version-control t)
+(setq kept-new-versions 10)
+(setq kept-old-versions 2)
+(setq delete-old-versions t)
+
+;; Put all auto-saves in ~/.emacs.d/auto-save-list/<full/path/to/file>
+(setq auto-save-file-name-transforms
+      `((".*" ,(expand-file-name "auto-save-list/" user-emacs-directory) t)))
+
 ;; Highlighting
 (require-package 'highlight-defined)
 (require-package 'rainbow-delimiters)
+(autoload 'highlight-defined-mode "highlight-defined" nil t)
+(autoload 'rainbow-delimiters-mode "rainbow-delimiters" nil t)
 
 (when (require 'highlight-defined nil t)
   (add-hook 'prog-mode-hook #'highlight-defined-mode))
@@ -82,36 +106,60 @@
 (when (require 'rainbow-delimiters nil t)
   (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
 
-;; Scratch
-(setq initial-major-mode 'org-mode
+;; NEW CODE
+(setq initial-major-mode 'lisp-interaction-mode
       initial-scratch-message "")
 
-(require-package 'persistent-scratch)
-(require 'persistent-scratch)
+(defun my/create-persistent-scratchpad ()
+  "Create the persistent scratchpad buffer."
+  (let ((file (expand-file-name ".persistent-scratchpad" user-emacs-directory)))
+    ;; Create file if it doesn't exist
+    (unless (file-exists-p file)
+      (with-temp-file file ""))
+    ;; Create and setup buffer
+    (with-current-buffer (get-buffer-create "*persistent-scratchpad*")
+      (org-mode)
+      (when (> (nth 7 (file-attributes file)) 0)
+        (insert-file-contents file))
+      (current-buffer))))
 
-(let ((file (expand-file-name ".persistent-scratch" user-emacs-directory)))
-  (unless (file-exists-p file)
-    (with-temp-file file "")))
+;; Auto-save periodically and on exit
+(defun my/save-persistent-scratchpad ()
+  "Save the persistent scratchpad."
+  (when (get-buffer "*persistent-scratchpad*")
+    (with-current-buffer "*persistent-scratchpad*"
+      (write-region (point-min) (point-max) 
+                    (expand-file-name ".persistent-scratchpad" user-emacs-directory)
+                    nil 'silent))))
 
-(setq persistent-scratch-backup-directory
-      (expand-file-name "scratch-backups/" user-emacs-directory))
+(add-hook 'emacs-startup-hook #'my/create-persistent-scratchpad)
+(add-hook 'kill-emacs-hook #'my/save-persistent-scratchpad)
+(run-with-timer 300 300 #'my/save-persistent-scratchpad) ; Auto-save every 5 minutes
 
-(add-hook 'emacs-startup-hook #'persistent-scratch-setup-default)
-
-(add-hook 'emacs-startup-hook
-          (lambda ()
-            (with-current-buffer "*scratch*"
-              (unless (derived-mode-p 'org-mode)
-                (org-mode)))))
-
-(global-set-key (kbd "H-s")
-  (lambda ()
-    (interactive)
-    (let ((win (get-buffer-window "*scratch*")))
+(defun my/open-persistent-scratchpad-vertical ()
+  "Toggle a right split window showing *persistent-scratchpad*."
+  (interactive)
+  (let ((win (get-buffer-window "*persistent-scratchpad*")))
       (if win
           (delete-window win)
         (select-window (split-window-right))
-        (switch-to-buffer "*scratch*")))))
+        (switch-to-buffer "*persistent-scratchpad*"))))
+
+(defun my/open-persistent-scratchpad-horizontal ()
+  "Toggle a bottom split window showing *persistent-scratchpad*."
+  (interactive)
+  (let ((win (get-buffer-window "*persistent-scratchpad*")))
+    (if win
+        (delete-window win)
+      (select-window (split-window-below))
+      (switch-to-buffer "*persistent-scratchpad*"))))
+
+(defun my/ensure-persistent-scratchpad ()
+  "Recreate persistent scratchpad if it was killed."
+  (unless (get-buffer "*persistent-scratchpad*")
+    (my/create-persistent-scratchpad)))
+
+(run-with-idle-timer 60 t #'my/ensure-persistent-scratchpad)
 
 ;; Editor Keybindings
 (rebind
@@ -119,25 +167,25 @@
  ("C-S-c" kill-ring-save)
  ("C-S-x" kill-region))
 
-(rebind
- ("C-c v" yank)
- ("C-c c" kill-ring-save)
- ("C-c x" kill-region)
- ("C-c a" mark-whole-buffer)
- ("C-c /" comment-line))
-
-;; (global-set-key (kbd "C-c a") 'mark-whole-buffer)
-
-;; (rebind
-;;  ("C-c /" comment-line))
+(global-set-key (kbd "C-/") #'comment-line)
 
 ;; Workflow Keybindings
 (rebind
  ("H-c"   compile)
  ("H-t"   shell)
- ("H-b"   eval-buffer)
  ("H-q"   delete-window)
- ("H-S-q" delete-other-windows))
+ ("H-b"   my/eval-buffer-with-message)
+ ("H-C-q" delete-other-windows)
+ ("H-s"   my/open-persistent-scratchpad-vertical)
+ ("H-C-s" my/open-persistent-scratchpad-horizontal))
+
+;; Custom Editor Keybindings
+(defun my/backward-delete-word ()
+  "Delete word backward without adding to kill ring."
+  (interactive)
+  (delete-region (point) (save-excursion (backward-word) (point))))
+
+(global-set-key (kbd "C-<backspace>") 'my/backward-delete-word)
 
 ;; Multiple Cursors
 (require-package 'multiple-cursors)
@@ -151,6 +199,7 @@
 (setq mc/always-repeat-command t
       mc/always-run-for-all t)
 
+;; Overwrites default delete
 (rebind
  ("C-d"   mc/mark-next-like-this)
  ("C-S-d" mc/mark-all-like-this)
@@ -162,8 +211,11 @@
 (require 'consult)
 
 (rebind
- ("C-S-f" consult-line)
- ("C-S-y" consult-yank-pop))
+ ("C-f" consult-line)
+ ("C-b" consult-buffer)
+ ("C-p" consult-ripgrep)
+ ("C-y" consult-yank-pop)
+ ("M-y" yank))
 ;;consult-find, consult-grep, consult-ripgrep
 
 ;; Undo/Redo
@@ -171,8 +223,10 @@
 (require 'undo-fu)
 
 (rebind
-  ("C-z"   undo-fu-only-undo)
-  ("C-S-z" undo-fu-only-redo))
+ ("C-z"   undo-fu-only-undo)
+ ("C-S-z" undo-fu-only-redo)
+ ("M-z"   undo-fu-only-redo))
+;; removed zap-to-char
 
 ;; Transpose
 (rebind
@@ -214,9 +268,6 @@
   (eval-buffer)
   (message "Buffer evaluated."))
 
-(rebind
- ("C-i" my/eval-buffer-with-message))
-
 ;; Keep warnings at the bottom
 (setq display-buffer-alist
       '(("\\*Warnings\\*"
@@ -238,20 +289,6 @@
 (setq dired-omit-files (concat dired-omit-files "\\|^#.*#$\\|^\\..*\\.swp$\\|~$"))
 (setq dired-omit-verbose nil)
 (add-hook 'dired-mode-hook #'dired-omit-mode)
-
-;; (defun my/dired-fzf-find-file ()
-;;   "Use fzf to select a file, then open its directory in dired and jump to it."
-;;   (interactive)
-;;   (let* ((default-directory (if (derived-mode-p 'dired-mode)
-;;                                 (dired-current-directory)
-;;                               default-directory))
-;;          (file (string-trim (shell-command-to-string "fzf --height=40% --preview 'head -100 {}'"))))
-;;     (when (and file (not (string= file "")))
-;;       (dired (file-name-directory (expand-file-name file)))
-;;       (dired-goto-file (expand-file-name file)))))
-
-;; (rebind
-;;  ("H-f" 'my/dired-fzf-find-file))
 
 ;; Magit
 (require-package 'magit)
@@ -299,28 +336,14 @@
       corfu-quit-no-match t)
 (global-corfu-mode 1)
 
-;; Eglot for Rust (auto-start in rust-mode)
-(add-hook 'rust-mode-hook #'eglot-ensure)
-
-(add-hook 'eglot-managed-mode-hook
-          (lambda ()
-            (flymake-mode -1)              ;; No diagnostics
-            (eldoc-mode -1)                ;; No eldoc popups or minibuffer docs
-            (when (boundp 'eglot--document-highlight)
-              (remove-hook 'post-command-hook #'eglot--document-highlight t))))
-
-;; Mute echo area more
-(setq eldoc-message-function #'ignore)
-(setq eglot-ignored-server-capabilities '(:inlayHintProvider))
-
-;; Format-on-save via rust-analyzer
-(setq-default eglot-workspace-configuration
-              '((:rust-analyzer . (:rustfmt . (:enable t)))))
-
 ;; Org
 (require 'url-handlers)  ; needed for org-download for some reason
 (require-package 'org-modern)
 (require-package 'org-download)
+
+(autoload 'org-modern-mode "org-modern" nil t)
+(autoload 'org-download-clipboard "org-download" nil t)
+(autoload 'org-download-enable   "org-download" nil t)
 
 (setq shift-select-mode t)
 (setq org-adapt-indentation nil)
@@ -404,25 +427,12 @@
       (end-of-line))))
 
 (defun my/org-paragraph-to-list (beg end)
-  "Turn region/paragraph into Org list, splitting at sentence end, newline, or heading. Punctuation is kept. Stops at heading lines."
+  "Turn sentences in region into list items."
   (interactive "r")
-  (let ((text (buffer-substring-no-properties beg end))
-        (start 0)
-        (len 0)
-        (regex "\\([.!?]\\)[ \t]+\\|\\(?:\n\\{1,2\\}\\)\\|\\(?:\n\\*+ \\)"))
+  (let ((text (buffer-substring-no-properties beg end)))
     (delete-region beg end)
-    (while (and (< start (length text))
-                (string-match regex text start))
-      (setq len (- (match-end 0) start))
-      (let ((piece (string-trim (substring text start (match-end 0)))))
-        (unless (string-match-p "^\\*+ " piece)
-          (insert "- " piece "\n")))
-      (setq start (match-end 0)))
-    ;; Handle the final chunk
-    (let ((final (string-trim (substring text start))))
-      (unless (string-match-p "^\\*+ " final)
-        (unless (string-empty-p final)
-          (insert "- " final "\n"))))))
+    (dolist (sentence (split-string text "[.!?]" t "[ \t\n]+"))
+      (insert "- " sentence ".\n"))))
 
 (defun my/org-tree-to-indirect-buffer ()
   "Clone current Org subtree to indirect buffer in the SAME window."
@@ -433,7 +443,7 @@
 
 
 (define-key org-mode-map (kbd "C-M-<return>") #'my/org-continue-list-or-paragraph)
-(define-key org-mode-map (kbd "C-c l") #'my/org-paragraph-to-list)
+(define-key org-mode-map (kbd "C-c o") #'my/org-paragraph-to-list)
 
 ;; Org keybindings
 (with-eval-after-load 'org
@@ -442,7 +452,6 @@
 
 (with-eval-after-load 'org
   (define-key org-mode-map (kbd "C-c i") 'my/org-tree-to-indirect-buffer))
-
 
 ;; Fixing Tab
 (setq org-adapt-indentation t)
@@ -459,27 +468,74 @@
 (with-eval-after-load 'org
   (define-key org-mode-map (kbd "TAB") #'my/org-smart-tab))
 
-;; PERSPECTIVE
+(require 'org-id)
+;; Prefer CUSTOM_ID when storing links; else create an ID automatically
+(setq org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
 
-;; Pure perspective-mode solution for isolated workspaces
+;; ;; Reset Org
+;; ;; --- Winner: keep the defaults when winner-mode is enabled
+;; (with-eval-after-load 'winner
+;;   ;; Defaults are C-c <left>/<right> ; ensure we didn't shadow them
+;;   (define-key global-map (kbd "C-c <left>")  #'winner-undo)
+;;   (define-key global-map (kbd "C-c <right>") #'winner-redo))
+
+;; ;; --- Org: put back the well-known keys we might've overridden
+;; (with-eval-after-load 'org
+;;   (define-key org-mode-map (kbd "C-c l")   #'org-store-link)
+;;   (define-key org-mode-map (kbd "C-c C-s") #'org-schedule)
+;;   (define-key org-mode-map (kbd "C-c /")   #'org-sparse-tree)
+;;   (define-key org-mode-map (kbd "C-c .")   #'org-time-stamp)
+;;   (define-key org-mode-map (kbd "C-c ,")   #'org-time-stamp-inactive)
+;;   (define-key org-mode-map (kbd "C-c C-a") #'org-attach))
+
+
+;; START OF WORKSPACE LOGIC
+;; START OF PERSPECTIVE
+
+
+;; PERSPECTIVE - Minimal, reliable workspace setup
+
 (require-package 'persp-mode)
 (require 'persp-mode)
 
-;; Configure persp-mode for automatic buffer management
+;; Turn OFF automatic buffer adding - we control everything manually
 (setq persp-autokill-buffer-on-remove 'kill-weak)
-;; Let persp-mode handle buffer adding automatically
-(setq persp-add-buffer-on-find-file t)
-(setq persp-add-buffer-on-after-change-major-mode t)
-;; Disable perspective save/restore to prevent old state loading
+(setq persp-add-buffer-on-find-file nil)  ; KEY: Don't auto-add
+(setq persp-add-buffer-on-after-change-major-mode nil)  ; KEY: Don't auto-add
 (setq persp-auto-save-opt 0)
 (setq persp-auto-resume-time -1)
+(setq persp-set-last-persp-for-new-frames nil)
+(setq persp-reset-windows-on-nil-window-conf nil)
 
-;; Don't kill existing perspectives - let them persist
-;; (Removed the destructive cleanup that was causing the issue)
-
+;; Enable persp-mode
 (persp-mode 1)
 
-;; Clean mode line first to prevent duplication on re-eval
+;; Create T1 and switch to it - but DON'T force any buffer
+(persp-add-new "T1")
+(persp-switch "T1")
+
+;; Mode line - shows all workspaces
+(defun my/persp-mode-line ()
+  "Show workspace numbers in mode line."
+  (let* ((persps (hash-table-keys *persp-hash*))
+         (sorted (sort (cl-remove-if-not 
+                       (lambda (n) (string-match "^T[1-9]$" n)) 
+                       persps)
+                      (lambda (a b) (< (string-to-number (substring a 1))
+                                      (string-to-number (substring b 1))))))
+         (current (safe-persp-name (get-current-persp))))
+    (if sorted
+        (concat "["
+                (mapconcat (lambda (name)
+                            (let ((num (substring name 1)))
+                              (if (string= name current)
+                                  (propertize num 'face 'mode-line-emphasis)
+                                num)))
+                          sorted ", ")
+                "] ")
+      "")))
+
+;; Clean existing mode line entries
 (setq-default mode-line-format
               (cl-remove-if (lambda (item)
                              (and (listp item)
@@ -488,126 +544,35 @@
                                   (eq (car (cadr item)) 'my/persp-mode-line)))
                            mode-line-format))
 
-;; Simple mode line to show workspace tabs (only on main buffer)
-(defun my/persp-mode-line ()
-  "Show perspective tabs in mode line, but only on the first/main window."
-  (when (and (not (minibufferp))
-             (eq (selected-window) (frame-first-window))
-             (not (string-match "^\\*vterm" (buffer-name)))
-             (not (string-match "^\\*scratch-T[0-9]+\\*$" (buffer-name))))
-    (let* ((persps (hash-table-keys *persp-hash*))
-           (sorted-persps (sort (cl-remove-if-not 
-                                (lambda (name) (string-match "^T[1-9]$" name)) 
-                                persps)
-                               (lambda (a b) (< (string-to-number (substring a 1))
-                                                (string-to-number (substring b 1))))))
-           (current (safe-persp-name (get-current-persp))))
-      (if sorted-persps
-          (concat "["
-                  (mapconcat (lambda (name)
-                              (let ((num (substring name 1)))
-                                (if (string= name current)
-                                    (propertize num 'face 'mode-line-emphasis)
-                                  num)))
-                            sorted-persps
-                            ", ")
-                  "] ")
-        ""))))
-
-;; Add back to mode line
+;; Add to mode line
 (setq-default mode-line-format
               (cons '(:eval (my/persp-mode-line))
                     mode-line-format))
 
-(defun my/get-scratch-buffer-for-workspace (workspace-num)
-  "Get or create a scratch buffer for WORKSPACE-NUM."
-  (let ((buffer-name (format "*scratch-T%d*" workspace-num)))
-    (or (get-buffer buffer-name)
-        (with-current-buffer (get-buffer-create buffer-name)
-          ;; Use the same mode as the default *scratch* buffer
-          (funcall initial-major-mode)
-          ;; Insert initial message if it exists
-          (when (and initial-scratch-message (not (string= initial-scratch-message "")))
-            (insert initial-scratch-message))
-          (current-buffer)))))
-
-;; Initialize all 9 workspaces at startup
-(defun my/initialize-all-workspaces ()
-  "Create all 9 workspaces with proper isolation."
-  ;; Only initialize if we don't already have ALL our workspaces
-  (unless (and (gethash "T1" *persp-hash*)
-               (gethash "T2" *persp-hash*)
-               (gethash "T9" *persp-hash*))
-    
-    ;; Save current state BEFORE doing anything
-    (let ((starting-persp (safe-persp-name (get-current-persp)))
-          (starting-buffer (current-buffer))
-          (starting-window-config (current-window-configuration)))
-      
-      ;; Only create missing workspaces
-      (let ((current-buffers (buffer-list)))
-        
-        ;; Create T1 with current buffers (preserve what's open) - only if it doesn't exist
-        (unless (gethash "T1" *persp-hash*)
-          (persp-add-new "T1")
-          (persp-switch "T1")
-          (dolist (buf current-buffers)
-            (unless (or (string-match "^ " (buffer-name buf))  ; skip hidden
-                       (string-match "^\\*scratch-T[0-9]+\\*$" (buffer-name buf))) ; skip workspace scratch
-              (persp-add-buffer buf))))
-        
-        ;; Create T2-T9 with only their scratch buffers
-        (dotimes (i 8)
-          (let* ((num (+ i 2))
-                 (persp-name (format "T%d" num)))
-            (unless (gethash persp-name *persp-hash*)
-              (let ((scratch-buf (my/get-scratch-buffer-for-workspace num)))
-                (persp-add-new persp-name)
-                (persp-switch persp-name)
-                (persp-add-buffer scratch-buf))))))
-      
-      ;; Restore everything exactly as it was
-      (cond
-       ((string= starting-persp "none") (persp-switch "T1"))
-       ((gethash starting-persp *persp-hash*) (persp-switch starting-persp))
-       (t (persp-switch "T1")))
-      
-      (set-window-configuration starting-window-config)
-      (when (buffer-live-p starting-buffer)
-        (switch-to-buffer starting-buffer)))))  ; Remove tab bar update
-
-;; Simple switching function
+;; Simple switch - create if doesn't exist
 (defun my/switch-workspace (num)
   "Switch to workspace NUM (1-9)."
   (let ((persp-name (format "T%d" num)))
-    (persp-switch persp-name)))  ; Remove tab bar update
+    (unless (gethash persp-name *persp-hash*)
+      (persp-add-new persp-name))
+    (persp-switch persp-name)))
 
+;; Kill workspace
 (defun my/kill-workspace (num)
-  "Kill workspace NUM."
+  "Kill workspace NUM and recreate it empty."
   (interactive "nWorkspace to kill (1-9): ")
   (let* ((persp-name (format "T%d" num))
-         (current-persp (safe-persp-name (get-current-persp)))
-         (scratch-buffer (get-buffer (format "*scratch-T%d*" num))))
+         (current-persp (safe-persp-name (get-current-persp))))
     
     (when (string= current-persp persp-name)
-      (user-error "Cannot kill current workspace. Switch to another first."))
+      (user-error "Can't kill current workspace. Switch first."))
     
-    (when scratch-buffer
-      (kill-buffer scratch-buffer))
+    (when (gethash persp-name *persp-hash*)
+      (persp-kill persp-name))
     
-    (persp-kill persp-name)
-    
-    ;; Recreate it fresh
-    (let ((scratch-buf (my/get-scratch-buffer-for-workspace num)))
-      (persp-add-new persp-name)
-      (persp-switch persp-name)
-      (persp-add-buffer scratch-buf)
-      (delete-other-windows)
-      (switch-to-buffer scratch-buf)
-      ;; Switch back to where we were
-      (persp-switch current-persp))))
+    (persp-add-new persp-name)))
 
-;; Set up keybindings
+;; Keybindings
 (dotimes (i 9)
   (let ((n (1+ i)))
     (global-set-key (kbd (format "H-%d" n))
@@ -616,56 +581,76 @@
 
 (global-set-key (kbd "H-k") #'my/kill-workspace)
 
-;; Initialize everything
-(my/initialize-all-workspaces)
+;; Auto-cleanup killed buffers
 (defun my/persp-kill-buffer-cleanup ()
-  "Automatically remove killed buffers from the current perspective."
+  "Remove killed buffers from current perspective."
   (when (and (bound-and-true-p persp-mode)
              (get-current-persp))
     (persp-remove-buffer (current-buffer) (get-current-persp) nil)))
 
 (add-hook 'kill-buffer-hook #'my/persp-kill-buffer-cleanup)
 
+;; Smart quit
 (global-set-key (kbd "C-c q")
   (lambda () (interactive)
     (let ((buf (current-buffer)))
       (cond
-       ;; If there's more than one window: kill this one and maybe the buffer
        ((cdr (window-list))
         (delete-window)
-        ;; If no window is now showing the buffer, kill it
         (unless (get-buffer-window buf 'visible)
           (persp-remove-buffer buf)
           (kill-buffer buf)))
-
-       ;; If this is the only window, prompt to kill the whole workspace
+       
        (t
-        (when (yes-or-no-p "Last window. Kill this workspace and buffer?")
+        (when (yes-or-no-p "Last window. Kill workspace?")
           (let* ((current-persp-name (safe-persp-name (get-current-persp)))
                  (workspace-num (when (string-match "^T\\([1-9]\\)$" current-persp-name)
                                  (string-to-number (match-string 1 current-persp-name)))))
             (if workspace-num
-                (my/kill-workspace workspace-num)
+                (progn
+                  (my/switch-workspace (if (= workspace-num 1) 2 1))
+                  (my/kill-workspace workspace-num))
               (kill-buffer buf)))))))))
 
+;; Perspective-scoped buffer switching
 (defun my/consult-buffer-persp ()
-  "Buffer switching scoped to current perspective."
+  "Switch buffer within current perspective."
   (interactive)
   (if (and (bound-and-true-p persp-mode) (get-current-persp))
-      (let* ((current-persp (get-current-persp))
-             (persp-buffers (when current-persp
-                             (persp-buffers current-persp))))
+      (let* ((persp-buffers (persp-buffers (get-current-persp))))
         (if persp-buffers
             (switch-to-buffer 
-             (completing-read "Buffer (perspective): " 
+             (completing-read "Buffer: " 
                              (mapcar #'buffer-name persp-buffers)))
-          (message "No buffers in current perspective")))
-    ;; Fallback to regular buffer switching if not in a perspective
-    (switch-to-buffer (completing-read "Buffer: " (mapcar #'buffer-name (buffer-list))))))
+          (message "No buffers in perspective")))
+    (switch-to-buffer (completing-read "Buffer: " 
+                                       (mapcar #'buffer-name (buffer-list))))))
 
 (global-set-key (kbd "C-x b") #'my/consult-buffer-persp)
 
-;; END OF PERSPECTIVE 
+;; Helper: manually add current buffer to perspective
+(defun my/add-buffer-to-persp ()
+  "Manually add current buffer to current perspective."
+  (interactive)
+  (when (get-current-persp)
+    (persp-add-buffer (current-buffer))
+    (message "Added %s to %s" (buffer-name) (safe-persp-name (get-current-persp)))))
+
+(global-set-key (kbd "H-a") #'my/add-buffer-to-persp)
+
+;; END OF PERSPECTIVE
+;; START OF TABS
+
+;; Alternative: tab-bar-mode for global tabs
+(tab-bar-mode 1)
+;; (setq tab-bar-close-button-show nil)
+;; (setq tab-bar-new-button-show nil)
+ 
+;; Global tab keybindings (if using tab-bar instead)
+(global-set-key (kbd "H-.") 'tab-bar-switch-to-next-tab)
+(global-set-key (kbd "H-,") 'tab-bar-switch-to-prev-tab)
+(global-set-key (kbd "H-t") 'tab-bar-new-tab)
+(global-set-key (kbd "H-w") 'tab-bar-close-tab)
 
 ;; Terminal
 (require-package 'vterm)
@@ -730,20 +715,26 @@ Show it in a bottom split if hidden, hide if visible."
         (rename-buffer buf-name))))))
 
 (rebind
-  ("C-S-<return>"     my/open-vterm-for-perspective)
-  ("C-H-<return>"     my/toggle-vterm-for-perspective)
-  ("C-H-S-<return>"   my/kill-vterm-for-perspective))
+  ("H-<return>"     my/open-vterm-for-perspective)
+  ("H-S-<return>"     my/toggle-vterm-for-perspective)
+  ("H-C-<return>"   my/kill-vterm-for-perspective))
+
+;; END OF WORKSPACE LOGIC
 
 ;; Tiling
 (require-package 'windmove)
 
 (windmove-default-keybindings 'hyper)
+
+;; Winner Mode
+;; NEW
+(require 'winner)
 (winner-mode 1)
 
 ;; Undo/Redo Window Changes
 (rebind
  ("H-z" winner-undo)
- ("H-S-z" winner-redo)) ;maybe make z & S-z/Z
+ ("H-r" winner-redo)) ;maybe make z & S-z/Z
 
 ;; Change Pane Focus
 (rebind
@@ -873,21 +864,15 @@ Show it in a bottom split if hidden, hide if visible."
 ;; (edwina-mode -1)
 ;; (unload-feature 'edwina t)
 
-;; LANGUAGE SUPPORT
-;; (require-package 'web-mode)
-
-;; (add-to-list 'auto-mode-alist '("\\.tsx\\'" . web-mode))
-
-;; (with-eval-after-load 'web-mode
-;;   (setq web-mode-enable-auto-quoting nil)
-;;   (add-to-list 'web-mode-content-types-alist '("jsx" . "\\.tsx\\'")))
+;; Formatting 
 (require-package 'treesit-auto)
-(require 'treesit-auto)  ;; ensures functions are loaded
+(require 'treesit-auto)
 
-(setq treesit-auto-install 'prompt)  ;; 't to auto-install silently, 'prompt to confirm
+(setq treesit-auto-install 'prompt)
 
 (global-treesit-auto-mode 1)
 (treesit-auto-add-to-auto-mode-alist 'all)
+(setq treesit-font-lock-level 4)
 
 ;; Non-Treesitter Languages
 (require-package 'markdown-mode)
@@ -895,80 +880,85 @@ Show it in a bottom split if hidden, hide if visible."
 (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
 
 (add-to-list 'load-path "~/.emacs.d/lisp")
-;; (require 'reformatter)
-;; (add-to-list 'load-path "~/.emacs.d/zig-mode")
-;; (require 'zig-mode)
-;; (add-to-list 'auto-mode-alist '("\\.zig\\'" . zig-mode))
+
+(require-package 'reformatter)
+(require 'reformatter)
+
+(require-package 'eglot)
+(autoload 'eglot-ensure "eglot" nil t)
+
+(require-package 'zig-mode)
+
+(add-hook 'zig-mode-hook  #'eglot-ensure)
+(add-hook 'rust-mode-hook #'eglot-ensure)
+
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs '(zig-mode . ("zls"))))
+
+(setq zig-format-on-save nil)
+
+;; Keep the minibuffer quiet and turn off some LSP niceties
+(setq eldoc-message-function #'ignore)
+
+;; Tell Eglot to ignore capabilities we don't want from servers
+;; Add documentHighlightProvider to stop symbol highlighting without touching internals
+(setq eglot-ignored-server-capabilities '(:inlayHintProvider :documentHighlightProvider))
+
+;; When Eglot manages a buffer, also turn off local modes you don't want
+(add-hook 'eglot-managed-mode-hook
+          (lambda ()
+            (flymake-mode -1)              ;; disable diagnostics UI
+            (eldoc-mode -1)                ;; no eldoc hints
+            ;; belt-and-suspenders if your Emacs has these minor modes:
+            (when (fboundp 'eglot-inlay-hints-mode)
+              (eglot-inlay-hints-mode -1))
+            (when (fboundp 'eglot-highlight-symbol-mode)
+              (eglot-highlight-symbol-mode -1))))
+
+;; (add-hook 'eglot-managed-mode-hook
+;;           (lambda ()
+;;             (flymake-mode -1)              ;; No diagnostics
+;;             (eldoc-mode -1)                ;; No eldoc popups or minibuffer docs
+;;             (when (boundp 'eglot--document-highlight)
+;;               (remove-hook 'post-command-hook #'eglot--document-highlight t))))
+
 (add-to-list 'auto-mode-alist '("\\.c3\\'" . c-mode))
 
-;; ;; Tell Emacs where to find your Odin grammar
-;; (add-to-list 'treesit-language-source-alist
-;;              '(odin . ("https://github.com/amaanq/tree-sitter-odin")))
+;; Mute echo area more
+(setq eldoc-message-function #'ignore)
+(setq eglot-ignored-server-capabilities '(:inlayHintProvider))
 
-;; ;; Register odin mode
-;; (add-to-list 'major-mode-remap-alist
-;;              '(odin-mode . odin-ts-mode))
+;; ;; Format-on-save via rust-analyzer
+;; (setq-default eglot-workspace-configuration
+;;               '((:rust-analyzer . (:rustfmt . (:enable t)))))
 
-;; ;; Optionally: Set file associations
-;; (add-to-list 'auto-mode-alist '("\\.odin\\'" . odin-mode))
+;; Jump to Definition
+(require-package 'dumb-jump)
+(require 'dumb-jump)
 
-;; (require-package 'tree-sitter)
-;; (require-package 'tree-sitter-langs)
+(setq dumb-jump-selector 'completing-read)
+(setq dumb-jump-prefer-searcher 'rg)
 
-;; (add-hook 'prog-mode-hook #'tree-sitter-mode)
-;; (add-hook 'prog-mode-hook #'tree-sitter-hl-mode)
-
-;; ;; Web
-;; (add-to-list 'auto-mode-alist '("\\.js\\'" . js-ts-mode))
-;; (add-to-list 'auto-mode-alist '("\\.jsx\\'" . js-ts-mode))
-;; (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
-;; (add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
-;; (add-to-list 'auto-mode-alist '("\\.html\\'" . html-ts-mode))
-;; (add-to-list 'auto-mode-alist '("\\.css\\'" . css-ts-mode))
-;; (add-to-list 'auto-mode-alist '("\\.json\\'" . json-ts-mode))
-;; (add-to-list 'auto-mode-alist '("\\.vue\\'" . web-mode))
-;; (add-to-list 'auto-mode-alist '("\\.svelte\\'" . web-mode))
-
-;; ;; Programming
-;; (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-ts-mode))
-;; (add-to-list 'auto-mode-alist '("\\.go\\'" . go-ts-mode))
-;; (add-to-list 'auto-mode-alist '("\\.c\\'" . c-ts-mode))
-;; (add-to-list 'auto-mode-alist '("\\.cpp\\'" . c++-ts-mode))
-;; (add-to-list 'auto-mode-alist '("\\.h\\'" . c-ts-mode))
-;; (add-to-list 'auto-mode-alist '("\\.java\\'" . java-ts-mode))
-;; (add-to-list 'auto-mode-alist '("\\.cs\\'" . csharp-ts-mode))
-
-;; ;; More
-;; (add-to-list 'auto-mode-alist '("\\.toml\\'" . toml-ts-mode))
-;; (add-to-list 'auto-mode-alist '("\\.v\\'" . verilog-mode))
-;; (add-to-list 'auto-mode-alist '("\\.sv\\'" . verilog-mode))
-;; (add-to-list 'auto-mode-alist '("\\.xml\\'" . xml-mode))
-;; (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-ts-mode))
-;; (add-to-list 'auto-mode-alist '("\\.yaml\\'" . yaml-ts-mode))
-;; (add-to-list 'auto-mode-alist '("\\.py\\'" . python-ts-mode))
-;; (add-to-list 'auto-mode-alist '("\\.sql\\'" . sql-mode))
-;; (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
-;; (add-to-list 'auto-mode-alist '("\\.json\\'" . json-ts-mode))
-
-
+(add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
+(setq xref-show-definitions-function #'xref-show-definitions-completing-read)
 
 ;; Linter
-(require-package 'flyspell) ;; only if you're not already loading it
+(require-package 'flyspell)
 (require 'flyspell)
 (require-package 'typescript-mode)
 
 ;; Formater
 (require-package 'format-all)
+;; NEW
+(autoload 'format-all-buffer "format-all" nil t) ; 
 
-(global-set-key (kbd "C-c f") #'format-all-buffer)
+(global-set-key (kbd "C-c M-f") #'format-all-buffer)
 
 ;; Custom Theme
 (set-fringe-mode 0)
 
 ;; Theme
 (require-package 'doom-themes)
-;(require-package 'catppuccin-theme)
-;(load-theme 'doom-one t)
 (load-theme 'doom-dracula t)
 
 (set-face-foreground 'vertical-border (face-background 'default))
@@ -996,6 +986,79 @@ Show it in a bottom split if hidden, hide if visible."
 
 (global-hl-todo-mode 1)
 
+;; ;; Require a colon after tag (e.g., BUG: something) to avoid false positives
+;; (setq hl-todo-require-punctuation t)
+
+;; ;; Dracula-ish palette (foregrounds)
+;; (defconst my/drac-red      "#ff5555")
+;; (defconst my/drac-orange   "#ffb86c")
+;; (defconst my/drac-yellow   "#f1fa8c")
+;; (defconst my/drac-green    "#50fa7b")
+;; (defconst my/drac-cyan     "#8be9fd")
+;; (defconst my/drac-blue     "#6272a4")
+;; (defconst my/drac-purple   "#bd93f9")
+;; (defconst my/drac-pink     "#ff79c6")
+
+;; ;; Practical keywords
+;; (setq hl-todo-keywords
+;;       '("NOW" "LATER" "BUG" "FIX" "WARN" "DEBT" "PERF" "IDEA" "TEMP" "NOTE" "DOC"))
+
+;; (setq hl-todo-keyword-faces
+;;       `(("ERROR"   . ,my/drac-red)
+;;         ("WARN"  . ,my/drac-orange)
+;;         ("EDIT" . ,my/drac-yellow)
+;;         ("SECTION"  . ,my/drac-purple)
+;;         ("IDEA"  . ,my/drac-pink)
+;;         ("TEMP"  . ,my/drac-blue)
+;;         ("NOTE"  . ,my/drac-cyan)
+;;         ("DOC"   . ,my/drac-green)))
+
+;; ;; Make hl-todo tags a touch bolder (optional)
+;; (custom-set-faces '(hl-todo ((t (:weight bold :underline nil)))))
+
+;; ;; ---- Tint the message after TAG: -----------------------------------
+;; (defun my/hl-todo--msg-face (hex)
+;;   "Return a face symbol that renders message text with HEX."
+;;   (let ((f (intern (format "my/hl-todo-msg-%s" (substring hex 1))))) ; face names can't include '#'
+;;     (unless (facep f)
+;;       (make-face f)
+;;       (set-face-attribute f nil :foreground hex :slant 'italic))
+;;     f))
+
+;; (defun my/hl-todo--build-rules ()
+;;   "Build font-lock rules to color message after TAG: using tag color."
+;;   (let (rules)
+;;     (dolist (kv hl-todo-keyword-faces (nreverse rules))
+;;       (let* ((tag (car kv))
+;;              (hex (cdr kv))
+;;              (msg-face (my/hl-todo--msg-face hex))
+;;              ;; Match: TAG: message   (group1=TAG, group2=message)
+;;              (rx  (concat "\\b\\(" (regexp-quote tag) "\\)\\s*:\\s-*\\(.*\\)$")))
+;;         (push
+;;          `(,rx
+;;            ;; group 1 is the tag (hl-todo already colors it; reinforce bold)
+;;            (1 (list :inherit (quote hl-todo) :weight 'bold) t)
+;;            ;; group 2 is the trailing message (our tinted face)
+;;            (2 (list :inherit (quote ,msg-face)) t))
+;;          rules)))))
+
+;; (defun my/hl-todo-extend-message-highlighting ()
+;;   "Activate message tinting in the current buffer."
+;;   (font-lock-add-keywords nil (my/hl-todo--build-rules) 'append)
+;;   (when font-lock-mode (font-lock-flush)))
+
+;; ;; Enable in code + org; add our message-tint hook when hl-todo turns on
+;; (add-hook 'prog-mode-hook #'hl-todo-mode)
+;; (add-hook 'org-mode-hook  #'hl-todo-mode)
+;; (add-hook 'hl-todo-mode-hook #'my/hl-todo-extend-message-highlighting)
+
+;; Usage: write lines like
+;;   BUG: crashes on empty input
+;;   PERF: stream decode to cut mem
+;;   DEBT: split module
+
+
+;; NOTE: LIGATURES
 (require-package 'ligature)
 (require 'ligature)
 
@@ -1030,6 +1093,20 @@ Show it in a bottom split if hidden, hide if visible."
     "+=" "-=" "*=" "/=" "%=" "&=" "|=" "^=" "<<=" ">>="
     "++=" "--=" "**="))
 
+;; Good ligatures for prose/code inside Org
+(ligature-set-ligatures 'org-mode
+  '("!=" "==" "==="
+    "<=" ">=" "=~" "/=" "~=" "~>" "=>"
+    "->" "<-" "<->" "<--" "-->" "<-->" "=>>" "<=>" "<==>"
+    "... " "..." "..<" "..=" ".=" ".?" "?." "?="
+    "<|" "<|>" "|>" "<$" "<$>" "$>" "<+>" "<*>" "<.>" "<^>" "<=>"
+    "~@" "\\/" "/\\"
+    ":=" ":>" "<:" "::=" "::"  ;; keep if you like, but consider removing "::"
+    "+=" "-=" "*=" "/=" "%=" "&=" "|=" "^=" "<<=" ">>="
+    "++=" "--=" "**=" "!!=" "!!?" "!~"
+    ))
+
+
 (global-ligature-mode 1)
 
 ;; Fonts
@@ -1054,12 +1131,12 @@ Show it in a bottom split if hidden, hide if visible."
      "0325a6b5eea7e5febae709dab35ec8648908af12cf2d2b569bedc8da0a3a81c1"
      default))
  '(package-selected-packages
-   '(consult corfu doom-themes format-all highlight-defined hl-todo
-             ligature magit marginalia markdown-mode multiple-cursors
-             orderless org-download org-modern persistent-scratch
-             persp-mode rainbow-delimiters tree-sitter
-             tree-sitter-langs treesit-auto typescript-mode undo-fu
-             vertico vterm web-mode)))
+   '(consult corfu doom-themes dumb-jump format-all ggtags
+             highlight-defined hl-todo ligature magit marginalia
+             markdown-mode multiple-cursors orderless org-download
+             org-modern persistent-scratch persp-mode
+             rainbow-delimiters tide treesit-auto typescript-mode
+             undo-fu vertico vterm zig-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

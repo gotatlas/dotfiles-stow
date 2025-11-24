@@ -28,7 +28,7 @@ export PATH="$HOME/.emacs.d/bin:$PATH"
 export BROWSER="brave"
 
 # Editor
-export EDITOR="emacs -nw"
+export EDITOR="doom-now"
 
 # Aliases
 alias cmacs='emacsclient -c -a ""'
@@ -50,6 +50,8 @@ alias untar='tar -xzvf'
 alias reload='source ~/.bashrc'
 alias ebrc='micro ~/.bashrc'
 alias reboot='sudo reboot'
+
+alias rapps='update-desktop-database ~/.local/share/applications'
 
 alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 alias venv='python -m venv .venv && source .venv/bin/activate'
@@ -92,6 +94,43 @@ gropen() {
 #   [ -z "$f" ] && { echo "gropen: no match" >&2; return 1; }
 #   emacsclient -n -- "$f" 2>/dev/null || emacs -- "$f"
 # }
+
+# --- Doom Emacs daemon config ---
+export DOOMDIR="$HOME/.config/doom"
+export DOOM_INIT="$HOME/.config/doom-emacs"
+
+# Start the daemon (idempotent)
+doomd-start() {
+  if emacsclient -s doom -e t >/dev/null 2>&1; then
+    echo "Doom daemon already running."
+  else
+    emacs --daemon=doom --init-directory="$DOOM_INIT"
+    echo "Doom daemon started."
+  fi
+}
+
+# Stop the daemon
+doomd-stop() {
+  emacsclient -s doom -e '(kill-emacs)'
+}
+
+# Ping status
+doomd-status() {
+  if emacsclient -s doom -e '(emacs-version)' >/dev/null 2>&1; then
+    echo "Doom daemon is up."
+  else
+    echo "Doom daemon is down."
+  fi
+}
+
+# Open a terminal frame (TTY)
+alias doomt='emacsclient -t -s doom'
+
+# Open a GUI frame
+alias doomc='emacsclient -c -n -s doom'
+
+# One-shot, no daemon: run Doom in the terminal right now
+alias doom-now='emacs --init-directory="$DOOM_INIT" -nw'
 
 
 # [ -f "/home/atlas/.ghcup/env" ] && . "/home/atlas/.ghcup/env" # ghcup-env

@@ -1,0 +1,378 @@
+# Default config for sway
+#
+# Copy this to ~/.config/sway/config and edit it to your liking.
+#
+# Read `man 5 sway` for a complete reference.
+font pango:JetBrainsMono Nerd Font 8
+# # class                 border  background text    indicator child_border
+# client.focused          #6272a4 #6272a4    #f8f8f2 #6272a4   #00000000
+# client.focused_inactive #44475a #44475a    #f8f8f2 #44475a   #00000000
+# client.unfocused        #282a36 #282a36    #f8f8f2 #282a36   #00000000
+# client.urgent           #ff5555 #ff5555    #f8f8f2 #ff5555   #00000000
+
+# class                 border  background text    indicator child_border
+client.focused          #6272a4 #6272a4    #f8f8f2 #6272a4   #44475a
+client.focused_inactive #44475a #44475a    #f8f8f2 #44475a   #44475a
+client.unfocused        #44475a #44475a    #f8f8f2 #44475a   #44475a
+client.urgent           #ff5555 #ff5555    #f8f8f2 #ff5555   #44475a
+
+### Variables           
+#
+# Logo key. Use Mod1 for Alt.
+set $mod Mod4
+# Home row direction keys, like vim
+# set $left h
+# set $down j
+# set $up k
+# set $right l
+# Your preferred terminal emulator
+set $term alacritty
+# Your preferred application launcher
+set $menu fuzzel --show drun
+
+# # Make systemd-user inherit our real Wayland env on every login/reload
+# exec_always systemctl --user import-environment WAYLAND_DISPLAY DISPLAY XDG_RUNTIME_DIR
+# # Start the bridge after env is imported
+# exec_always systemctl --user start --no-block xwaylandvideobridge.service
+# Polkit for authentication 
+exec_always /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
+
+# Xwayland video bridge
+# exec_always pkill -x xwaylandvideobridge; xwaylandvideobridge &
+# exec_always sh -c 'pgrep -xu "$USER" xwaylandvideobridge >/dev/null || exec xwaylandvideobridge'
+exec_always sh -c 'pkill -xu "$USER" -f xwaylandvideobridge; sleep 0.2; exec xwaylandvideobridge --no-window &'
+# Not sure if working
+exec_always xfce4-power-manager &
+
+# Notifications
+exec_always mako
+
+# Emacs
+# exec --no-startup-id emacs --daemon
+exec_always env DOOMDIR=$HOME/.config/doom emacs --fg-daemon=doom --init-directory=$HOME/.config/doom-emacs
+
+exec --no-startup-id swaymsg 'workspace 1; exec alacritty'
+exec --no-startup-id swaymsg 'workspace 2; exec firefox'
+exec --no-startup-id swaymsg 'workspace 5; exec discord'
+# Loads slower than the others
+# exec --no-startup-id swaymsg 'workspace 3; exec emacsclient -c -a ""'
+
+
+### Output configuration
+#
+# Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
+output * bg ~/Pictures/base.png fill
+#
+# Example configuration:
+#
+#   output HDMI-A-1 resolution 1920x1080 position 1920,0
+#
+# You can get the names of your outputs by running: swaymsg -t get_outputs
+
+### Idle configuration
+#
+# Example configuration:
+#
+# exec swayidle -w \
+#          timeout 300 'swaylock -f -c 000000' \
+#          timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
+#          before-sleep 'swaylock -f -c 000000'
+#
+# This will lock your screen after 300 seconds of inactivity, then turn off
+# your displays after another 300 seconds, and turn your screens back on when
+# resumed. It will also lock your screen before your computer goes to sleep.
+
+### Input configuration
+input * {
+    xkb_options caps:hyper
+}
+# Example configuration:
+#
+input type:touchpad {
+    dwt enabled
+    tap enabled
+    natural_scroll enabled
+    middle_emulation enabled
+    # accel_profile flat
+    # pointer_accel 0
+    # tap enabled
+    # drag enabled
+    drag_lock disabled
+}
+
+# # Test
+# input "1267:12826:ELAN0788:00_04F3:321A_Touchpad" {
+#     dwt enabled
+# }
+
+input type:keyboard {
+    xkb_layout "us"
+}
+#
+# You can also configure each device individually.
+# Read `man 5 sway-input` for more information about this section.
+
+### Key bindings
+#
+# Basics:
+#
+    # Start a terminal
+    bindsym $mod+Return exec $term
+
+    # Kill focused window
+    bindsym $mod+Shift+q kill
+
+    # Start your launcher
+    bindsym $mod+d exec $menu
+
+    # Drag floating windows by holding down $mod and left mouse button.
+    # Resize them with right mouse button + $mod.
+    # Despite the name, also works for non-floating windows.
+    # Change normal to inverse to use left mouse button for resizing and right
+    # mouse button for dragging.
+    floating_modifier $mod normal
+
+    # Better wrapping?
+    focus_wrapping smart
+
+    # Reload the configuration file
+    bindsym $mod+Shift+c reload
+
+    # Exit sway (logs you out of your Wayland session)
+    bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
+#
+# Moving around:
+#
+    # Move your focus around
+    # bindsym $mod+$left focus left
+    # bindsym $mod+$down focus down
+    # bindsym $mod+$up focus up
+    # bindsym $mod+$right focus right
+    # Or use $mod+[up|down|left|right]
+    bindsym $mod+Left focus left
+    bindsym $mod+Down focus down
+    bindsym $mod+Up focus up
+    bindsym $mod+Right focus right
+
+    # Move the focused window with the same, but add Shift
+    # bindsym $mod+Shift+$left move left
+    # bindsym $mod+Shift+$down move down
+    # bindsym $mod+Shift+$up move up
+    # bindsym $mod+Shift+$right move right
+    # Ditto, with arrow keys
+    bindsym $mod+Shift+Left move left
+    bindsym $mod+Shift+Down move down
+    bindsym $mod+Shift+Up move up
+    bindsym $mod+Shift+Right move right
+#
+# Workspaces:
+#
+    # Switch to workspace
+    bindsym $mod+1 workspace number 1
+    bindsym $mod+2 workspace number 2
+    bindsym $mod+3 workspace number 3
+    bindsym $mod+4 workspace number 4
+    bindsym $mod+5 workspace number 5
+    bindsym $mod+6 workspace number 6
+    bindsym $mod+7 workspace number 7
+    bindsym $mod+8 workspace number 8
+    bindsym $mod+9 workspace number 9
+    bindsym $mod+0 workspace number 10
+    # Move focused container to workspace
+    bindsym $mod+Shift+1 move container to workspace number 1
+    bindsym $mod+Shift+2 move container to workspace number 2
+    bindsym $mod+Shift+3 move container to workspace number 3
+    bindsym $mod+Shift+4 move container to workspace number 4
+    bindsym $mod+Shift+5 move container to workspace number 5
+    bindsym $mod+Shift+6 move container to workspace number 6
+    bindsym $mod+Shift+7 move container to workspace number 7
+    bindsym $mod+Shift+8 move container to workspace number 8
+    bindsym $mod+Shift+9 move container to workspace number 9
+    bindsym $mod+Shift+0 move container to workspace number 10
+    # Note: workspaces can have any name you want, not just numbers.
+    # We just use 1-10 as the default.
+
+    bindgesture swipe:4:left  workspace next
+    bindgesture swipe:4:right workspace prev
+
+    #bindsym $mod+backslash move container to workspace hidden
+    #bindsym $mod+bracketright move container to scratchpad
+    bindsym $mod+Shift+slash move container to workspace hidden
+    #bindsym $mod+apostrophe move container to scratchpad
+    workspace hidden output none
+
+
+
+
+    # for_window [app_id="org.kde.xwaylandvideobridge"] move to workspace hidden
+    # exec_always --no-startup-id systemctl --user restart xwaylandvideobridge.service
+
+#
+# Layout stuff:
+#
+    # You can "split" the current object of your focus with
+    # $mod+b or $mod+v, for horizontal and vertical splits
+    # respectively.
+    bindsym $mod+s splith
+    bindsym $mod+v splitv
+    bindsym $mod+e layout toggle split
+
+    # Switch the current container between different layout styles
+    # bindsym $mod+s layout stacking
+    bindsym $mod+w layout tabbed
+    # bindsym $mod+s layout stacking
+    bindsym $mod+t layout splith
+
+    # Make the current focus fullscreen
+    bindsym $mod+f fullscreen
+
+    # Toggle the current focus between tiling and floating mode
+    bindsym $mod+Shift+space floating toggle
+
+    # Swap focus between the tiling area and the floating area
+    bindsym $mod+space focus mode_toggle
+
+    # Move focus to the parent container
+    bindsym $mod+a focus parent
+    bindsym $mod+Shift+a focus child
+
+#
+# Scratchpad:
+#
+    # Sway has a "scratchpad", which is a bag of holding for windows.
+    # You can send windows there and get them back later.
+
+    # # Move the currently focused window to the scratchpad
+    # bindsym $mod+Shift+minus move scratchpad
+
+    # # Show the next scratchpad window or hide the focused scratchpad window.
+    # # If there are multiple scratchpad windows, this command cycles through them.
+    # bindsym $mod+minus scratchpad show
+
+    # # Quickly cycle through them
+    # bindsym $mod+equal scratchpad show, scratchpad show
+
+    # Send focused window to scratchpad (make sure it won’t stay sticky there)
+    bindsym $mod+Shift+minus sticky disable, move scratchpad
+
+    # Show scratchpad and make it persist across workspace switches (on this output)
+    bindsym $mod+minus scratchpad show, sticky enable
+
+    # Cycle through scratchpad windows; ensure each one you pop is sticky
+    bindsym $mod+equal scratchpad show, sticky enable, scratchpad show
+
+    # Toggle sticky on the focused container (works for scratchpad popups too)
+    bindsym $mod+Shift+equal sticky toggle
+
+
+
+
+    for_window [class="xwaylandvideobridge"] move to workspace number 11
+    workspace number 11 output none
+
+    bindsym $mod+Shift+l exec swaylock -f -c 000000
+
+
+#
+# Resizing containers:
+#
+mode "resize" {
+    # left will shrink the containers width
+    # right will grow the containers width
+    # up will shrink the containers height
+    # down will grow the containers height
+    # bindsym $left resize shrink width 10px
+    # bindsym $down resize grow height 10px
+    # bindsym $up resize shrink height 10px
+    # bindsym $right resize grow width 10px
+
+    # Ditto, with arrow keys
+    bindsym Left resize shrink width 10px
+    bindsym Down resize grow height 10px
+    bindsym Up resize shrink height 10px
+    bindsym Right resize grow width 10px
+
+    # Return to default mode
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+    bindsym $mod+r mode "default"
+}
+bindsym $mod+r mode "resize"
+
+bindsym $mod+Ctrl+Left resize shrink width 50px
+bindsym $mod+Ctrl+Down resize shrink height 50px
+bindsym $mod+Ctrl+Up resize grow height 50px
+bindsym $mod+Ctrl+Right resize grow width 50px
+
+bindsym $mod+Ctrl+s resize set width 25ppt
+# bindsym $mod+Ctrl+ resize set 50ppt 50ppt
+# bindsym $mod+Alt+3 resize set 75ppt 75ppt
+
+#
+# Extras:
+#
+bindsym $mod+Shift+p mode "passthrough"
+mode "passthrough" {
+    bindsym $mod+Shift+p mode "default"
+}
+
+bindsym Print mode "shot"
+mode "shot" {
+    bindsym f exec grim ~/Pictures/Screenshots/full-$(date +%s).png; mode "default"
+    bindsym s exec grim -g "$(slurp)" ~/Pictures/Screenshots/sel-$(date +%s).png; mode "default"
+    bindsym Escape mode "default"
+}
+
+#
+# Utilities:
+#
+    # Special keys to adjust volume via PulseAudio
+    bindsym --locked XF86AudioMute exec pactl set-sink-mute \@DEFAULT_SINK@ toggle
+    bindsym --locked XF86AudioLowerVolume exec pactl set-sink-volume \@DEFAULT_SINK@ -5%
+    bindsym --locked XF86AudioRaiseVolume exec pactl set-sink-volume \@DEFAULT_SINK@ +5%
+    bindsym --locked XF86AudioMicMute exec pactl set-source-mute \@DEFAULT_SOURCE@ toggle
+    # Special keys to adjust brightness via brightnessctl
+    bindsym --locked XF86MonBrightnessDown exec brightnessctl set 5%-
+    bindsym --locked XF86MonBrightnessUp exec brightnessctl set 5%+
+    # Special key to take a screenshot with grim
+    # bindsym Print exec grim
+
+# in sway config
+bindsym $mod+Shift+n exec makoctl restore
+
+
+#
+# Status Bar:
+#
+# Read `man 5 sway-bar` for more information about this section.
+
+# default_border normal
+# default_floating_border normal
+# hide_edge_borders both
+# smart_borders on
+
+
+# bar {
+#     position bottom
+#     font pango:JetBrainsMono Nerd Font 8
+
+#     # When the status_command prints a new line to stdout, swaybar updates.
+#     # The default just shows the current date and time.
+#     # status_command while date +'%Y-%m-%d %X'; do sleep 1; done
+#     # workspace_buttons no
+#     status_command python3 -u ~/.config/sway/pythonblocks.py
+#     colors {
+#         background #282a36
+#         statusline #f8f8f2
+#         separator  #44475a
+
+#         focused_workspace  #6272a4 #6272a4 #f8f8f2
+#         inactive_workspace #44475a #44475a #f8f8f2
+#         urgent_workspace   #ff5555 #ff5555 #f8f8f2
+#     }
+# }
+bar {
+    swaybar_command waybar
+}
+
+include /etc/sway/config.d/*

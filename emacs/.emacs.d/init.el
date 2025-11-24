@@ -1,3 +1,40 @@
+;; UTF-8 encoding - files and processes
+(prefer-coding-system 'utf-8)
+(set-default-coding-systems 'utf-8)
+(setq-default buffer-file-coding-system 'utf-8-unix)
+(setq default-process-coding-system '(utf-8 . utf-8))
+
+;; Stop Emacs from choosing raw-text
+(setq auto-coding-regexp-alist
+      (delete (rassq 'raw-text auto-coding-regexp-alist)
+              auto-coding-regexp-alist))
+
+;; Force all files to UTF-8
+(modify-coding-system-alist 'file "" 'utf-8)
+
+;; Clipboard/selection - XWayland UTF-8 fix
+(setq x-select-request-type '(UTF8_STRING))
+(setq selection-coding-system 'utf-8)
+
+;; (setq x-select-enable-clipboard t)
+;; (setq x-select-enable-primary t)
+;; (setq x-select-enable-clipboard-manager nil)
+
+;;; --- UTF-8 harden + escape-off switch ---
+
+;; Make sure language env is UTF-8 (affects multibyte handling defaults)
+(set-language-environment "UTF-8")
+
+;; Terminal/keyboard/file/locale paths too
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system  'utf-8)
+(setq locale-coding-system   'utf-8
+      file-name-coding-system 'utf-8)
+
+;; Stop Lisp from octal-escaping non-ASCII in *Messages*/eval prints
+(setq print-escape-nonascii nil
+      print-escape-multibyte nil)
+
 ;; Globals
 (tool-bar-mode -1)
 (menu-bar-mode -1)
@@ -6,6 +43,8 @@
 (setq display-line-numbers-type t)
 (global-display-line-numbers-mode t)
 (global-visual-line-mode 1)
+;; Help with performance
+(global-so-long-mode 1)
 
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 4)
@@ -23,10 +62,7 @@
 
 (setq inhibit-startup-screen t)
 
-(setq initial-buffer-choice nil) ;; was t
-
-;(defalias 'yes-or-no-p (lambda (&rest args) t))
-;(defalias 'y-or-n-p (lambda (&rest args) t))
+(setq initial-buffer-choice nil)
 
 (fset 'yes-or-no-p 'y-or-n-p)
 
@@ -37,16 +73,6 @@
               (let ((dir (file-name-directory buffer-file-name)))
                 (unless (file-exists-p dir)
                   (make-directory dir t))))))
-
-;; Set Hyperkey if not done for system
-;; (define-key key-translation-map (kbd "<Multi_key>") (kbd "H-"))
-;; (define-key key-translation-map (kbd "<XF86CapsLock>") 'event-apply-hyper-modifier)
-
-;; (global-set-key (kbd "C-c h") #'event-apply-hyper-modifier) ; C-c h f => H-f
-;; Wayland Hyperkey
-;; (define-key key-translation-map (kbd "<caps>") 'event-apply-hyper-modifier)
-;; (define-key input-decode-map (kbd "<Hyper_L>") (kbd "H-"))
-;; (define-key input-decode-map (kbd "<hyper>") (kbd "H-"))
 
 ;; Rebind Macro
 (defmacro rebind (&rest bindings)
@@ -85,30 +111,23 @@
       `(("." . ,(expand-file-name "backups/" user-emacs-directory))))
 
 ;; Use versioned backups (foo.txt~, foo.txt~~, …)
-(setq version-control t)
-(setq kept-new-versions 10)
-(setq kept-old-versions 2)
-(setq delete-old-versions t)
+(setq version-control t
+    kept-new-versions 10
+    kept-old-versions 2
+    delete-old-versions t
+    backup-by-copying t
+    make-backup-files t
+    vc-make-backup-files t)
 
 ;; Put all auto-saves in ~/.emacs.d/auto-save-list/<full/path/to/file>
 (setq auto-save-file-name-transforms
       `((".*" ,(expand-file-name "auto-save-list/" user-emacs-directory) t)))
 
 ;; Highlighting
-(require-package 'highlight-defined)
 (require-package 'rainbow-delimiters)
-(autoload 'highlight-defined-mode "highlight-defined" nil t)
 (autoload 'rainbow-delimiters-mode "rainbow-delimiters" nil t)
-
-(when (require 'highlight-defined nil t)
-  (add-hook 'prog-mode-hook #'highlight-defined-mode))
-
 (when (require 'rainbow-delimiters nil t)
   (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
-
-;; NEW CODE
-(setq initial-major-mode 'lisp-interaction-mode
-      initial-scratch-message "")
 
 (defun my/create-persistent-scratchpad ()
   "Create the persistent scratchpad buffer."
@@ -167,17 +186,25 @@
  ("C-S-c" kill-ring-save)
  ("C-S-x" kill-region))
 
-(global-set-key (kbd "C-/") #'comment-line)
+;; (when (display-graphic-p)
+;;   (global-set-key (kbd "s-c") #'clipboard-kill-ring-save)
+;;   (global-set-key (kbd "s-x") #'clipboard-kill-region)
+;;   (global-set-key (kbd "s-v") #'clipboard-yank))
+
+;; ("C-/" comment-line)
+(rebind
+ ("C-c /" comment-line)
+ ("C-c C-/" comment-line))
 
 ;; Workflow Keybindings
 (rebind
- ("H-c"   compile)
- ("H-t"   shell)
- ("H-q"   delete-window)
- ("H-b"   my/eval-buffer-with-message)
- ("H-C-q" delete-other-windows)
- ("H-s"   my/open-persistent-scratchpad-vertical)
- ("H-C-s" my/open-persistent-scratchpad-horizontal))
+ ("C-M-c"   compile)
+ ("C-M-t"   shell)
+ ("C-M-q"   delete-window)
+ ("C-M-b"   reload-init)
+ ("C-M-S-q" delete-other-windows)
+ ("C-M-s"   my/open-persistent-scratchpad-vertical)
+ ("C-M-S-s" my/open-persistent-scratchpad-horizontal))
 
 ;; Custom Editor Keybindings
 (defun my/backward-delete-word ()
@@ -202,8 +229,8 @@
 ;; Overwrites default delete
 (rebind
  ("C-d"   mc/mark-next-like-this)
- ("C-S-d" mc/mark-all-like-this)
- ("C-M-d" mc/repeat-command))
+ ("C-S-d" mc/mark-all-like-this))
+ ;; ("C-M-d" mc/repeat-command)
 ;; mc/edit-lines & mc/mark-previous-like-this
 
 ;; Consult
@@ -216,6 +243,11 @@
  ("C-p" consult-ripgrep)
  ("C-y" consult-yank-pop)
  ("M-y" yank))
+
+(recentf-mode 1)
+(setq recentf-max-saved-items 100)
+
+(global-set-key (kbd "C-c r") #'consult-recent-file)
 ;;consult-find, consult-grep, consult-ripgrep
 
 ;; Undo/Redo
@@ -229,15 +261,11 @@
 ;; removed zap-to-char
 
 ;; Transpose
-(rebind
-  ("M-<up>"    (lambda () (interactive) (let ((col (current-column))) (transpose-lines 1) (forward-line -2) (move-to-column col))))
-  ("M-<down>"  (lambda () (interactive) (forward-line 1) (transpose-lines 1) (forward-line -1)))
-  ("M-H-<left>"  (lambda () (interactive) (transpose-words -1)))
-  ("M-H-<right>" transpose-words))
-
-;; End/Start of Line 
-;(global-unset-key (kbd "M-S-<up>"))
-;(global-unset-key (kbd "M-S-<down>"))
+;; (rebind
+;;   ("M-<up>"    (lambda () (interactive) (let ((col (current-column))) (transpose-lines 1) (forward-line -2) (move-to-column col))))
+;;   ("M-<down>"  (lambda () (interactive) (forward-line 1) (transpose-lines 1) (forward-line -1))))
+  ;; ("M-H-<left>"  (lambda () (interactive) (transpose-words -1)))
+  ;; ("M-H-<right>" transpose-words)
 
 (rebind
  ("M-<left>"  move-beginning-of-line)
@@ -267,6 +295,15 @@
   (interactive)
   (eval-buffer)
   (message "Buffer evaluated."))
+
+(setq load-prefer-newer t) ; ignore stale .elc/eln
+(defun reload-init ()
+  (interactive)
+  (let ((debug-on-error t))
+    (mapc #'disable-theme custom-enabled-themes) ; avoid stacked themes
+    (load user-init-file nil 'nomessage)))
+;; (global-set-key (kbd "<f5>") #'reload-init)
+
 
 ;; Keep warnings at the bottom
 (setq display-buffer-alist
@@ -305,11 +342,17 @@
 
 (global-set-key (kbd "C-c d") #'magit-dotfiles)
 
-;; Updated Search/Autocomplete
+;; NOTE Updated Search/Autocomplete
+
 ;; VERTICO
 (require-package 'vertico)
 (require 'vertico)
 (vertico-mode 1)
+
+;; SAVEHIST
+(require-package 'savehist)
+(savehist-mode 1)
+(setq savehist-additional-variables '(search-ring regexp-search-ring))
 
 ;; ORDERLESS
 (require-package 'orderless)
@@ -324,17 +367,6 @@
 (marginalia-mode 1)
 (setq marginalia-annotators
       '(marginalia-annotators-heavy marginalia-annotators-light nil))
-
-;; CORFU
-;; Corfu completion setup (good defaults)
-(require-package 'corfu)
-(require 'corfu)
-(setq corfu-auto t
-      corfu-cycle t
-      corfu-preselect 'prompt
-      corfu-quit-at-boundary t
-      corfu-quit-no-match t)
-(global-corfu-mode 1)
 
 ;; Org
 (require 'url-handlers)  ; needed for org-download for some reason
@@ -446,9 +478,9 @@
 (define-key org-mode-map (kbd "C-c o") #'my/org-paragraph-to-list)
 
 ;; Org keybindings
-(with-eval-after-load 'org
-  (define-key org-mode-map (kbd "C-M-<left>") 'backward-sentence)
-  (define-key org-mode-map (kbd "C-M-<right>") 'forward-sentence))
+;; (with-eval-after-load 'org
+;;   (define-key org-mode-map (kbd "C-M-<left>") 'backward-sentence)
+;;   (define-key org-mode-map (kbd "C-M-<right>") 'forward-sentence))
 
 (with-eval-after-load 'org
   (define-key org-mode-map (kbd "C-c i") 'my/org-tree-to-indirect-buffer))
@@ -471,23 +503,6 @@
 (require 'org-id)
 ;; Prefer CUSTOM_ID when storing links; else create an ID automatically
 (setq org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
-
-;; ;; Reset Org
-;; ;; --- Winner: keep the defaults when winner-mode is enabled
-;; (with-eval-after-load 'winner
-;;   ;; Defaults are C-c <left>/<right> ; ensure we didn't shadow them
-;;   (define-key global-map (kbd "C-c <left>")  #'winner-undo)
-;;   (define-key global-map (kbd "C-c <right>") #'winner-redo))
-
-;; ;; --- Org: put back the well-known keys we might've overridden
-;; (with-eval-after-load 'org
-;;   (define-key org-mode-map (kbd "C-c l")   #'org-store-link)
-;;   (define-key org-mode-map (kbd "C-c C-s") #'org-schedule)
-;;   (define-key org-mode-map (kbd "C-c /")   #'org-sparse-tree)
-;;   (define-key org-mode-map (kbd "C-c .")   #'org-time-stamp)
-;;   (define-key org-mode-map (kbd "C-c ,")   #'org-time-stamp-inactive)
-;;   (define-key org-mode-map (kbd "C-c C-a") #'org-attach))
-
 
 ;; START OF WORKSPACE LOGIC
 ;; START OF PERSPECTIVE
@@ -643,8 +658,6 @@
 
 ;; Alternative: tab-bar-mode for global tabs
 (tab-bar-mode 1)
-;; (setq tab-bar-close-button-show nil)
-;; (setq tab-bar-new-button-show nil)
  
 ;; Global tab keybindings (if using tab-bar instead)
 (global-set-key (kbd "H-.") 'tab-bar-switch-to-next-tab)
@@ -715,16 +728,11 @@ Show it in a bottom split if hidden, hide if visible."
         (rename-buffer buf-name))))))
 
 (rebind
-  ("H-<return>"     my/open-vterm-for-perspective)
+  ("C-M-<return>"     my/open-vterm-for-perspective)
   ("H-S-<return>"     my/toggle-vterm-for-perspective)
-  ("H-C-<return>"   my/kill-vterm-for-perspective))
+  ("C-M-S-<return>"   my/kill-vterm-for-perspective))
 
 ;; END OF WORKSPACE LOGIC
-
-;; Tiling
-(require-package 'windmove)
-
-(windmove-default-keybindings 'hyper)
 
 ;; Winner Mode
 ;; NEW
@@ -733,53 +741,52 @@ Show it in a bottom split if hidden, hide if visible."
 
 ;; Undo/Redo Window Changes
 (rebind
- ("H-z" winner-undo)
- ("H-r" winner-redo)) ;maybe make z & S-z/Z
+ ("C-M-z" winner-undo)
+ ("C-M-S-z" winner-redo)) ;maybe make z & S-z/Z
+
+;; Tiling
+(require-package 'windmove)
+(windmove-default-keybindings 'hyper)
 
 ;; Change Pane Focus
 (rebind
- ("H-<left>" windmove-left)
- ("H-<right>" windmove-right)
- ("H-<up>" windmove-up)
- ("H-<down>" windmove-down))
+ ("M-<left>" windmove-left)
+ ("M-<right>" windmove-right)
+ ("M-<up>" windmove-up)
+ ("M-<down>" windmove-down))
 
 ;; Creating Panes 
 (rebind
- ("H-S-<left>"  (lambda () (interactive) (split-window-horizontally) (windmove-left)))
- ("H-S-<right>" (lambda () (interactive) (split-window-horizontally) (windmove-right)))
- ("H-S-<up>"    (lambda () (interactive) (split-window-vertically) (windmove-up)))
- ("H-S-<down>"  (lambda () (interactive) (split-window-vertically) (windmove-down))))
+ ("M-S-<left>"  (lambda () (interactive) (split-window-horizontally) (windmove-left)))
+ ("M-S-<right>" (lambda () (interactive) (split-window-horizontally) (windmove-right)))
+ ("M-S-<up>"    (lambda () (interactive) (split-window-vertically) (windmove-up)))
+ ("M-S-<down>"  (lambda () (interactive) (split-window-vertically) (windmove-down))))
 
-;; Resizing Panes
-(defun smart-resize ()
-  (interactive)
-  (let* ((key (key-description (this-command-keys-vector)))
-         (direction
-          (cond
-           ((string-match "<left>" key)  'left)
-           ((string-match "<right>" key) 'right)
-           ((string-match "<up>" key)    'up)
-           ((string-match "<down>" key)  'down)
-           (t (user-error "Can't determine direction from: %s" key)))))
-    (pcase direction
-      ('left  (if (window-in-direction 'left)
-                  (enlarge-window-horizontally 5)
-                (shrink-window-horizontally 5)))
-      ('right (if (window-in-direction 'right)
-                  (enlarge-window-horizontally 5)
-                (shrink-window-horizontally 5)))
-      ('up    (if (window-in-direction 'above)
-                  (enlarge-window 5)
-                (shrink-window 5)))
-      ('down  (if (window-in-direction 'below)
-                  (enlarge-window 5)
-                (shrink-window 5))))))
+(defun resize-right () (interactive)
+       (if (window-in-direction 'right)
+           (enlarge-window-horizontally 5)
+         (shrink-window-horizontally 5)))
+
+(defun resize-left () (interactive)
+       (if (window-in-direction 'left)
+           (enlarge-window-horizontally 5)
+         (shrink-window-horizontally 5)))
+
+(defun resize-up () (interactive)
+       (if (window-in-direction 'above)
+           (enlarge-window 5)
+         (shrink-window 5)))
+
+(defun resize-down () (interactive)
+       (if (window-in-direction 'below)
+           (enlarge-window 5)
+         (shrink-window 5)))
 
 (rebind
- ("H-C-<left>" smart-resize)
- ("H-C-<right>" smart-resize)
- ("H-C-<up>" smart-resize)
- ("H-C-<down>" smart-resize))
+ ("M-C-<left>"  resize-left)
+ ("M-C-<right>" resize-right)
+ ("M-C-<up>"    resize-up)
+ ("M-C-<down>"  resize-down))
 
 ;; Moving Panes
 (defvar my-unmovable-modes '(eat-mode vterm-mode term-mode))
@@ -833,37 +840,6 @@ Show it in a bottom split if hidden, hide if visible."
  ("H-M-<return>"   move-buffer-to-new-frame)
  ("H-M-S-<return>" return-buffer-to-previous-frame))
 
-;; Install and test Edwina
-;; (require-package 'edwina)
-
-;; (require 'edwina)
-;; (setq edwina-split-default-direction 'right) ;; or 'below
-;; (edwina-mode 1)
-
-;; (setcdr edwina-mode-map nil)
-;; (rebind
-;;            ("H-<right>"   edwina-select-next-window)
-;;            ("H-<left>"    edwina-select-previous-window)
-;;            ("H-<down>"    edwina-select-next-window)
-;;            ("H-<up>"      edwina-select-previous-window)
-;;            ("H-q"         edwina-delete-window)
-;;            ("H-C-<right>" edwina-inc-mfact)
-;;            ("H-C-<left>"  edwina-dec-mfact)
-;;            ("H-M-<right>" edwina-swap-next-window)
-;;            ("H-M-<left>"  edwina-swap-previous-window)
-;;            ("H-M-<up>"    edwina-swap-previous-window)
-;;            ("H-M-<down>"  edwina-swap-next-window)          
-;;            ("H-<return>"  edwina-clone-window t)
-;;            ("H-f"         edwina-zoom)
-;;            ("H-C-<up>"    edwina-inc-nmaster)
-;;            ("H-C-<down>"  edwina-dec-nmaster))
-
-;(define-key edwina-mode-map (kbd "C-x 2") nil)
-;(define-key edwina-mode-map (kbd "C-x 3") nil)
-;; Optional: kill it all if needed
-;; (edwina-mode -1)
-;; (unload-feature 'edwina t)
-
 ;; Formatting 
 (require-package 'treesit-auto)
 (require 'treesit-auto)
@@ -884,53 +860,19 @@ Show it in a bottom split if hidden, hide if visible."
 (require-package 'reformatter)
 (require 'reformatter)
 
-(require-package 'eglot)
-(autoload 'eglot-ensure "eglot" nil t)
-
 (require-package 'zig-mode)
-
-(add-hook 'zig-mode-hook  #'eglot-ensure)
-(add-hook 'rust-mode-hook #'eglot-ensure)
-
-(with-eval-after-load 'eglot
-  (add-to-list 'eglot-server-programs '(zig-mode . ("zls"))))
-
 (setq zig-format-on-save nil)
 
-;; Keep the minibuffer quiet and turn off some LSP niceties
-(setq eldoc-message-function #'ignore)
-
-;; Tell Eglot to ignore capabilities we don't want from servers
-;; Add documentHighlightProvider to stop symbol highlighting without touching internals
-(setq eglot-ignored-server-capabilities '(:inlayHintProvider :documentHighlightProvider))
-
-;; When Eglot manages a buffer, also turn off local modes you don't want
-(add-hook 'eglot-managed-mode-hook
-          (lambda ()
-            (flymake-mode -1)              ;; disable diagnostics UI
-            (eldoc-mode -1)                ;; no eldoc hints
-            ;; belt-and-suspenders if your Emacs has these minor modes:
-            (when (fboundp 'eglot-inlay-hints-mode)
-              (eglot-inlay-hints-mode -1))
-            (when (fboundp 'eglot-highlight-symbol-mode)
-              (eglot-highlight-symbol-mode -1))))
-
-;; (add-hook 'eglot-managed-mode-hook
-;;           (lambda ()
-;;             (flymake-mode -1)              ;; No diagnostics
-;;             (eldoc-mode -1)                ;; No eldoc popups or minibuffer docs
-;;             (when (boundp 'eglot--document-highlight)
-;;               (remove-hook 'post-command-hook #'eglot--document-highlight t))))
+(require-package 'typescript-mode)
 
 (add-to-list 'auto-mode-alist '("\\.c3\\'" . c-mode))
 
-;; Mute echo area more
-(setq eldoc-message-function #'ignore)
-(setq eglot-ignored-server-capabilities '(:inlayHintProvider))
+;; Formater
+(require-package 'format-all)
+;; NEW
+(autoload 'format-all-buffer "format-all" nil t) ; 
 
-;; ;; Format-on-save via rust-analyzer
-;; (setq-default eglot-workspace-configuration
-;;               '((:rust-analyzer . (:rustfmt . (:enable t)))))
+(global-set-key (kbd "C-c M-f") #'format-all-buffer)
 
 ;; Jump to Definition
 (require-package 'dumb-jump)
@@ -941,18 +883,6 @@ Show it in a bottom split if hidden, hide if visible."
 
 (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
 (setq xref-show-definitions-function #'xref-show-definitions-completing-read)
-
-;; Linter
-(require-package 'flyspell)
-(require 'flyspell)
-(require-package 'typescript-mode)
-
-;; Formater
-(require-package 'format-all)
-;; NEW
-(autoload 'format-all-buffer "format-all" nil t) ; 
-
-(global-set-key (kbd "C-c M-f") #'format-all-buffer)
 
 ;; Custom Theme
 (set-fringe-mode 0)
@@ -985,78 +915,6 @@ Show it in a bottom split if hidden, hide if visible."
         ("DEPRECATED" . "#999999"))) ;; gray
 
 (global-hl-todo-mode 1)
-
-;; ;; Require a colon after tag (e.g., BUG: something) to avoid false positives
-;; (setq hl-todo-require-punctuation t)
-
-;; ;; Dracula-ish palette (foregrounds)
-;; (defconst my/drac-red      "#ff5555")
-;; (defconst my/drac-orange   "#ffb86c")
-;; (defconst my/drac-yellow   "#f1fa8c")
-;; (defconst my/drac-green    "#50fa7b")
-;; (defconst my/drac-cyan     "#8be9fd")
-;; (defconst my/drac-blue     "#6272a4")
-;; (defconst my/drac-purple   "#bd93f9")
-;; (defconst my/drac-pink     "#ff79c6")
-
-;; ;; Practical keywords
-;; (setq hl-todo-keywords
-;;       '("NOW" "LATER" "BUG" "FIX" "WARN" "DEBT" "PERF" "IDEA" "TEMP" "NOTE" "DOC"))
-
-;; (setq hl-todo-keyword-faces
-;;       `(("ERROR"   . ,my/drac-red)
-;;         ("WARN"  . ,my/drac-orange)
-;;         ("EDIT" . ,my/drac-yellow)
-;;         ("SECTION"  . ,my/drac-purple)
-;;         ("IDEA"  . ,my/drac-pink)
-;;         ("TEMP"  . ,my/drac-blue)
-;;         ("NOTE"  . ,my/drac-cyan)
-;;         ("DOC"   . ,my/drac-green)))
-
-;; ;; Make hl-todo tags a touch bolder (optional)
-;; (custom-set-faces '(hl-todo ((t (:weight bold :underline nil)))))
-
-;; ;; ---- Tint the message after TAG: -----------------------------------
-;; (defun my/hl-todo--msg-face (hex)
-;;   "Return a face symbol that renders message text with HEX."
-;;   (let ((f (intern (format "my/hl-todo-msg-%s" (substring hex 1))))) ; face names can't include '#'
-;;     (unless (facep f)
-;;       (make-face f)
-;;       (set-face-attribute f nil :foreground hex :slant 'italic))
-;;     f))
-
-;; (defun my/hl-todo--build-rules ()
-;;   "Build font-lock rules to color message after TAG: using tag color."
-;;   (let (rules)
-;;     (dolist (kv hl-todo-keyword-faces (nreverse rules))
-;;       (let* ((tag (car kv))
-;;              (hex (cdr kv))
-;;              (msg-face (my/hl-todo--msg-face hex))
-;;              ;; Match: TAG: message   (group1=TAG, group2=message)
-;;              (rx  (concat "\\b\\(" (regexp-quote tag) "\\)\\s*:\\s-*\\(.*\\)$")))
-;;         (push
-;;          `(,rx
-;;            ;; group 1 is the tag (hl-todo already colors it; reinforce bold)
-;;            (1 (list :inherit (quote hl-todo) :weight 'bold) t)
-;;            ;; group 2 is the trailing message (our tinted face)
-;;            (2 (list :inherit (quote ,msg-face)) t))
-;;          rules)))))
-
-;; (defun my/hl-todo-extend-message-highlighting ()
-;;   "Activate message tinting in the current buffer."
-;;   (font-lock-add-keywords nil (my/hl-todo--build-rules) 'append)
-;;   (when font-lock-mode (font-lock-flush)))
-
-;; ;; Enable in code + org; add our message-tint hook when hl-todo turns on
-;; (add-hook 'prog-mode-hook #'hl-todo-mode)
-;; (add-hook 'org-mode-hook  #'hl-todo-mode)
-;; (add-hook 'hl-todo-mode-hook #'my/hl-todo-extend-message-highlighting)
-
-;; Usage: write lines like
-;;   BUG: crashes on empty input
-;;   PERF: stream decode to cut mem
-;;   DEBT: split module
-
 
 ;; NOTE: LIGATURES
 (require-package 'ligature)
@@ -1103,22 +961,26 @@ Show it in a bottom split if hidden, hide if visible."
     "~@" "\\/" "/\\"
     ":=" ":>" "<:" "::=" "::"  ;; keep if you like, but consider removing "::"
     "+=" "-=" "*=" "/=" "%=" "&=" "|=" "^=" "<<=" ">>="
-    "++=" "--=" "**=" "!!=" "!!?" "!~"
-    ))
-
+    "++=" "--=" "**=" "!!=" "!!?" "!~"))
 
 (global-ligature-mode 1)
 
 ;; Fonts
-;; Twemoji for emoji rendering
-; (set-fontset-font t 'emoji (font-spec :family "Twemoji Mozilla") nil 'prepend)
-;; Minimalist monochrome emoji (Unifont or Symbola)
-; (set-fontset-font t 'emoji (font-spec :family "Unifont") nil 'prepend)
-;; Main coding font
 (add-to-list 'default-frame-alist '(font . "JetBrains Mono-14"))
 (set-frame-font "JetBrains Mono-14" t t)
-;; OR
-; (set-frame-font "Fira Code-12" t t)
+;; Try these fonts in order for any missing glyphs
+(set-fontset-font t nil "Noto Sans" nil 'append)
+(set-fontset-font t nil "Symbola" nil 'append)
+(set-fontset-font t nil "DejaVu Sans" nil 'append)
+
+;; Use your regular UI font first:
+;; (set-face-attribute 'default nil :family "JetBrainsMono Nerd Font" :height 140)
+
+;; Force emoji coverage (prepend so it wins over mono fonts)
+(when (member "Noto Color Emoji" (font-family-list))
+  (set-fontset-font t 'emoji "Noto Color Emoji" nil 'prepend)
+  (set-fontset-font t 'symbol "Noto Color Emoji" nil 'prepend))
+
 
 ;; Automatic
 (custom-set-variables

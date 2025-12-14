@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+clients=$(./current-tag-clients)
+[ -z "$clients" ] && exit 0
+[ "$clients" -le 1 ] && exit 0
+
+best_i=0
+best_x=-999999
+i=0
+
+# Scan around the ring with focusstack,next
+while [ "$i" -lt "$clients" ]; do
+    x=$(./mango-get-x)
+    if [ "$x" -gt "$best_x" ]; then
+        best_x="$x"
+        best_i="$i"
+    fi
+    mmsg -d focusstack,next
+    i=$((i+1))
+done
+
+# Back at original focus; now move to the rightmost one.
+i=0
+while [ "$i" -lt "$best_i" ]; do
+    mmsg -d focusstack,next
+    i=$((i+1))
+done

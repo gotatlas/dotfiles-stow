@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# How many clients are on the active tag?
+# Uses: mmsg -g -t    -> lines like:
+# eDP-1 tag 2 1 4 1
+# $1 monitor, $2 "tag", $3 tag-num, $4 state, $5 clients, $6 focused-idx
+
+clients=$(mmsg -g -t | awk '/ tag / && $4 == 1 { print $5; exit }')
+
+echo "${clients:-0}"

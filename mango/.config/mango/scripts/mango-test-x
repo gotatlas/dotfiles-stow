@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "=== mmsg -x raw ==="
+mmsg -x
+echo
+
+echo "=== parsed X from mango-get-x ==="
+./mango-get-x

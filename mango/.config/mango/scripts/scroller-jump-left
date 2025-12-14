@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+read clients idx0 <<< "$(./mango-tag-state)"
+
+[ "$clients" -le 1 ] && exit 0
+
+steps="$idx0"
+
+while [ "$steps" -gt 0 ]; do
+	mmsg -d focusstack,prev
+	steps=$((steps - 1))
+done
+
+
+# clients=$(./current-tag-clients)
+# # 0 or 1 client? nothing to do
+# [ -z "$clients" ] && exit 0
+# [ "$clients" -le 1 ] && exit 0
+# 
+# best_i=0
+# best_x=999999
+# i=0
+# 
+# # Scan around the ring with focusstack,prev
+# while [ "$i" -lt "$clients" ]; do
+#     # geometry: x y w h -> take x
+# 	x=$(./mango-get-x)
+#     if [ "$x" -lt "$best_x" ]; then
+#         best_x="$x"
+#         best_i="$i"
+#     fi
+#     mmsg -d focusstack,prev
+#     i=$((i+1))
+# done
+# 
+# # After clients steps, focus is back where we started.
+# # Now walk best_i steps again to land on the leftmost client.
+# i=0
+# while [ "$i" -lt "$best_i" ]; do
+#     mmsg -d focusstack,prev
+#     i=$((i+1))
+# done

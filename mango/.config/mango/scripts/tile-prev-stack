@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+clients=$(./current-tag-clients)
+[ -z "$clients" ] && exit 0
+[ "$clients" -le 1 ] && exit 0
+
+# 1) Find minimal x (master column)
+min_x=999999
+i=0
+while [ "$i" -lt "$clients" ]; do
+    x=$(mmsg -x | awk '{print $1}')
+    if [ "$x" -lt "$min_x" ]; then
+        min_x="$x"
+    fi
+    mmsg -d focusstack,next
+    i=$((i+1))
+done
+
+# 2) Walk backwards until we land on a stack client
+i=0
+while [ "$i" -lt "$clients" ]; do
+    mmsg -d focusstack,prev
+    x=$(mmsg -x | awk '{print $1}')
+    if [ "$x" -gt "$min_x" ]; then
+        break
+    fi
+    i=$((i+1))
+done

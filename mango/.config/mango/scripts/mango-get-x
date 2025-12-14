@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Extract X coordinate of the focused client from "mmsg -x" output.
+# Expected format (multiple lines), e.g.:
+#   eDP-1 x 576
+#   eDP-1 y 24
+#   eDP-1 width 576
+#   eDP-1 height 1056
+
+raw="$(mmsg -x)"
+
+x="$(awk '$2 == "x" { print $3; exit }' <<< "$raw")"
+
+# Failsafe: if we didn't find anything numeric, bail
+if [ -z "${x:-}" ]; then
+    echo "mango-get-x: failed to parse X from:" >&2
+    echo "$raw" >&2
+    exit 1
+fi
+
+echo "$x"

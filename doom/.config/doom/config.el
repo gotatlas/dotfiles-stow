@@ -66,6 +66,12 @@
   (setq unicode-fonts-skip-font-groups '(emoji))
   (unicode-fonts-setup))
 
+;; CLIPBOARD
+(after! emacs
+  (setq select-enable-clipboard t
+        select-enable-primary t
+        mouse-drag-copy-region nil))
+
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
 ;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
 ;;
@@ -391,11 +397,32 @@
       "[" #'tab-previous
       "]" #'tab-next
 
+      "M-<left>" #'tab-previous
+      "M-<right>" #'tab-next
       )
 
+;; (defvar my/hold-f6-map
+;;   (let ((m (make-sparse-keymap)))
+;;     (define-key m (kbd "a") #'some-command)
+;;     (define-key m (kbd "b") #'other-command)
+;;     (define-key m (kbd "c") #'another-command)
+;;     m)
+;;   "Keymap active while holding F6.")
+
+;; (defun my/activate-f6-hold-map ()
+;;   "Activate hold-to-use keymap while F6 is physically held."
+;;   (interactive)
+;;   ;; Install the transient map
+;;   (set-transient-map my/hold-f6-map t)
+;;   ;; Now loop until F6 is released
+;;   (while (equal last-command-event (elt (kbd "<f6>") 0))
+;;     (sit-for 0.02)))
+
+;; ;; Bind it
+;; (global-set-key (kbd "<f6>") #'my/activate-f6-hold-map)
 
 
-      ;; "b" #'eval-buffer
+;;       ;; "b" #'eval-buffer
       ;; "r" #'doom/reload
 
 ;; (map!

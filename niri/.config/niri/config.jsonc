@@ -2,19 +2,17 @@
   "layer": "top",
   "position": "top",
   "modules-left": [
-    "ext/workspaces",
+    "niri/workspaces",
     // "custom/sep",
-    // "dwl/window#layout",
-    // "custom/sep",
-    "dwl/window#title"
+    "niri/window"
   ],
   "modules-center": [
+    "privacy",
   ],
   "modules-right": [
-    //"mpris",
-    //"privacy",
-    //"keyboard-state",
-    "custom/sep",
+    // "mpris",
+    //"custom/sep",
+    //"custom/sep",
     "custom/mic",
     "custom/sep",
     "pulseaudio",
@@ -31,12 +29,16 @@
     "custom/sep",
     "disk",
     "custom/sep",
-    "clock",
-    "custom/sep",
-    "tray"
+    "clock"
+    //"custom/sep",
+    //"tray"
   ],
+  "niri/workspaces": {
+    "format": "{index}",
+    "all-outputs": true
+  },
   "mpris": {
-    "format": "{player_icon} [  ]",              // playing
+    "format": "[  ]",              // playing
     "format-paused": "[  ]",       // paused
     "tooltip": true,
     "on-click": "playerctl play-pause",
@@ -63,13 +65,13 @@
     "tooltip": "Mic (click: mute, scroll: volume)"
   },
   "privacy": {
-  "icon-spacing": 4,
-  "icon-size": 12,
-  "modules": [
-    { "type": "screenshare", "tooltip": true },
-    { "type": "audio-out",   "tooltip": true },
-    { "type": "audio-in",    "tooltip": true }
-  ]
+      "icon-spacing": 8,
+      "icon-size": 12,
+      "modules": [
+          { "type": "screenshare", "tooltip": true },
+          { "type": "audio-out",   "tooltip": true },
+          { "type": "audio-in",    "tooltip": true }
+      ]
 },
   "temperature": {
     "thermal-zone": 0,      // try 0, 1, 2 if unsure
@@ -77,14 +79,14 @@
     "format": "{temperatureC}°C",
     "critical-threshold": 80
   },
-"keyboard-state": {
-  "format": "{icon}",
-  "capslock": true,
-  "numlock": true,
-  "scrolllock": false
-},
+  "keyboard-state": {
+    "format": "{icon}",
+    "capslock": true,
+    "numlock": true,
+    "scrolllock": false
+  },
   "clock": {
-    "format": "{:%Y-%m-%d %H:%M}",
+    "format": "{:%H:%M}  ",
     "format-alt": "{:%a %m-%d-%y %H:%M}",
     "tooltip-format": "<big>{:%B %Y}</big>\n{calendar}"
   },
@@ -92,25 +94,25 @@
     "format": "{usage}% ",
     "interval": 5,
     "tooltip": true,
-    "on-click": "alacritty -e cpu-auto",
+    //"on-click": "alacritty -e cpu-auto"
   },
   "memory": {
     "format": "{used}GiB ",
     "interval": 5,
     "tooltip": true,
-    "on-click": "alacritty -e btop",
+    "on-click": "alacritty -e btop"
   },
   "disk": {
     "interval": 60,
     "path": "/",
     "format": "{free} 󰋊",
-    "on-click": "xdg-open ~"
+    "on-click": "thunar ~"
   },
   "battery": {
     "states": {
       "good": 95,
-      "warning": 30,
-      "critical": 15
+      "warning": 20,
+      "critical": 10
     },
     "format": "{capacity}% {icon}",
     "format-charging": "{capacity}% ",

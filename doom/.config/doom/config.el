@@ -66,6 +66,15 @@
   (setq unicode-fonts-skip-font-groups '(emoji))
   (unicode-fonts-setup))
 
+;; Remove CSD
+;; Kill the window manager decorations (title bar, borders)
+(add-to-list 'default-frame-alist '(undecorated . t))
+(add-to-list 'initial-frame-alist '(undecorated . t))
+
+;; If you use emacsclient/daemon, make new frames match too
+(add-hook 'after-make-frame-functions
+          (lambda (f) (set-frame-parameter f 'undecorated t)))
+
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
 ;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
 ;;
@@ -276,6 +285,13 @@
       (setq pop-out-window-configuration nil)
       (setq pop-out-original-frame nil))))
 
+(after! vterm
+  (add-hook! 'vterm-mode-hook
+    (setq-local buffer-read-only nil)
+    (read-only-mode -1)
+    (when (bound-and-true-p vterm-copy-mode)
+      (vterm-copy-mode -1))))
+
 ;;; NOTE KEYBINDS
 ;; ORG
 (use-package! org
@@ -397,6 +413,9 @@
 
       ;; "b" #'eval-buffer
       ;; "r" #'doom/reload
+
+;; (map!
+;;  ("C-x @ h a" #'mark-whole-buffer))
 
 ;; (map!
 ;;  ("M-S-<left>"  #'resize-left)

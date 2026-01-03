@@ -61,7 +61,7 @@ exec --no-startup-id swaymsg 'workspace 5; exec discord'
 ### Output configuration
 #
 # Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
-output * bg ~/Pictures/base.png fill
+output * bg ~/Pictures/Wallpapers/base.png fill
 #
 # Example configuration:
 #
@@ -352,27 +352,29 @@ bindsym $mod+Shift+n exec makoctl restore
 # smart_borders on
 
 
-# bar {
-#     position bottom
-#     font pango:JetBrainsMono Nerd Font 8
-
-#     # When the status_command prints a new line to stdout, swaybar updates.
-#     # The default just shows the current date and time.
-#     # status_command while date +'%Y-%m-%d %X'; do sleep 1; done
-#     # workspace_buttons no
-#     status_command python3 -u ~/.config/sway/pythonblocks.py
-#     colors {
-#         background #282a36
-#         statusline #f8f8f2
-#         separator  #44475a
-
-#         focused_workspace  #6272a4 #6272a4 #f8f8f2
-#         inactive_workspace #44475a #44475a #f8f8f2
-#         urgent_workspace   #ff5555 #ff5555 #f8f8f2
-#     }
-# }
 bar {
-    swaybar_command waybar
+    position bottom
+    font pango:JetBrainsMono Nerd Font 8
+
+    # When the status_command prints a new line to stdout, swaybar updates.
+    # The default just shows the current date and time.
+    # status_command while date +'%Y-%m-%d %X'; do sleep 1; done
+    # workspace_buttons no
+    # status_command python3 -u ~/.config/sway/pythonblocks.py
+    status_command i3status-rs ~/.config/i3status-rust/config.toml
+
+    colors {
+        background #282a36
+        statusline #f8f8f2
+        separator  #44475a
+
+        focused_workspace  #6272a4 #6272a4 #f8f8f2
+        inactive_workspace #44475a #44475a #f8f8f2
+        urgent_workspace   #ff5555 #ff5555 #f8f8f2
+    }
 }
+# bar {
+#     swaybar_command waybar
+# }
 
 include /etc/sway/config.d/*

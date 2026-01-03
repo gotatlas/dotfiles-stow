@@ -21,11 +21,8 @@ export PATH="$PATH:$(go env GOPATH)/bin"
 eval "$(fzf --bash)"
 export FZF_DEFAULT_OPTS="--height=40% --layout=reverse --border --preview 'bat --style=numbers --color=always {} | head -500'"
 
-# Doom Emacs
-export PATH="$HOME/.emacs.d/bin:$PATH"
-
 # Browser
-export BROWSER="brave"
+export BROWSER="firefox"
 
 # Editor
 export EDITOR="doom-now"
@@ -44,6 +41,8 @@ alias la='ls -A'
 alias mkdir='mkdir -pv'
 alias rm='rm -i'
 alias rmrf='rm -Irv'
+
+alias ffc='fastfetch'
 
 alias untar='tar -xzvf'
 
@@ -80,24 +79,9 @@ gropen() {
   fi
 }
 
-# # grope: cd to the dir of the first file whose contents match (ripgrep)
-# grope() {
-#   local f
-#   IFS= read -r -d '' f < <(rg -uu -l -0 -- "$*" .)
-#   [ -n "$f" ] && cd -- "$(dirname -- "$f")" || { echo "grope: no match" >&2; return 1; }
-# }
-# 
-# # gropen: open the first matching file in Emacs (prefer existing server)
-# gropen() {
-#   local f
-#   IFS= read -r -d '' f < <(rg -uu -l -0 -- "$*" .)
-#   [ -z "$f" ] && { echo "gropen: no match" >&2; return 1; }
-#   emacsclient -n -- "$f" 2>/dev/null || emacs -- "$f"
-# }
-
 # --- Doom Emacs daemon config ---
 export DOOMDIR="$HOME/.config/doom"
-export DOOM_INIT="$HOME/.config/doom-emacs"
+export DOOM_INIT="$HOME/.config/emacs"
 
 # Start the daemon (idempotent)
 doomd-start() {
@@ -132,12 +116,16 @@ alias doomc='emacsclient -c -n -s doom'
 # One-shot, no daemon: run Doom in the terminal right now
 alias doom-now='emacs --init-directory="$DOOM_INIT" -nw'
 
-
-# [ -f "/home/atlas/.ghcup/env" ] && . "/home/atlas/.ghcup/env" # ghcup-env
-
 # Created by `pipx` on 2025-08-06 21:41:24
 export PATH="$PATH:/home/atlas/.local/bin"
 export PATH="$HOME/.local/zig/0.15.1:$PATH"
 export PYENV_ROOT="$HOME/.pyenv"
 command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init -)"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# Added by LM Studio CLI tool (lms)
+export PATH="$PATH:/home/atlas/.lmstudio/bin"

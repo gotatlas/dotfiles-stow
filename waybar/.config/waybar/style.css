@@ -1,0 +1,373 @@
+/* ==== Dracula x Sway (compact, sharp, no height/line-height) ==== */
+@define-color bg        #282a36;
+@define-color bg_alt    #303241;
+@define-color line      #44475a;
+@define-color fg        #f8f8f2;
+@define-color accent    #6272a4;
+@define-color purple    #bd93f9;
+@define-color pink      #ff79c6;
+@define-color cyan      #8be9fd;
+@define-color green     #50fa7b;
+@define-color orange    #ffb86c;
+@define-color red       #ff5555;
+@define-color yellow    #f1fa8c;
+
+/* Global reset = thin */
+* {
+  border: 0;
+  border-radius: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+}
+
+#waybar, window#waybar {
+  background: @bg;
+  color: @fg;
+  font-family: JetBrainsMono, monospace;
+  font-size: 11px;          /* main control for overall thickness */
+  box-shadow: none;
+}
+
+/* Modules: only horizontal padding + sway-like separators */
+#mode, #tray, #keyboard-state
+#privacy, #bluetooth, #network, #vpn, #idle_inhibitor,
+#power-profiles-daemon, #backlight, #pulseaudio, #wireplumber,
+#pulseaudio.microphone, #cpu, #temperature, #memory, #disk,
+#mpris, #battery, #clock, #custom-power, #custom-quick, #custom-updates {
+  padding: 0 6px;           /* no vertical padding */
+  border-left: 1px solid @line;
+}
+#workspaces {
+  padding: 0 8px;
+}
+.modules-left  > *:first-child,
+.modules-center> *:first-child,
+.modules-right > *:first-child { border-left: 0; }
+
+/* Workspaces = sway style underline for focused */
+#workspaces { padding: 0; }
+#workspaces button {
+  color: @fg; background: transparent;
+  padding: 0 6px; margin: 0;
+}
+#workspaces button.focused {
+  /* border-bottom: 2px solid @accent; */
+  background-color: @accent;
+}
+#workspaces button.visible:not(.focused) { border-bottom: 2px solid @line; }
+#workspaces button.urgent { color: @red; border-bottom: 2px solid @red; }
+
+/* Mode (resize etc.) */
+#mode { color: @bg; background: @accent; }
+
+#taskbar button {
+padding: 0 2px;
+margin: 0 1px;
+}
+
+/* Status accents */
+#pulseaudio.muted, #wireplumber.muted { color: @accent; }
+#network.disconnected, #vpn.disabled { color: @orange; }
+#cpu.warning, #memory.warning, #battery.warning { color: @orange; }
+#cpu.critical, #memory.critical, #battery.critical, #temperature.critical { color: @red; }
+
+/* Tooltips (Dracula) */
+tooltip { background: @bg_alt; color: @fg; border: 1px solid @line; }
+
+#tray {
+padding-right: 2px;
+margin-right: 2px;
+}
+
+#custom-power {font-size: 17px;}
+/* Optional subtle hover */
+/* #workspaces button:hover, */
+/* #taskbar button:hover { background: alpha(@line, 0.12); } */
+
+
+/* :root { */
+/*   --bg:      #282a36; */
+/*   --bg-alt:  #303241; */
+/*   --line:    #44475a;    /\* current_line / separators *\/ */
+/*   --fg:      #f8f8f2; */
+/*   --accent:  #6272a4;    /\* your focused border color *\/ */
+/*   --purple:  #bd93f9; */
+/*   --pink:    #ff79c6; */
+/*   --cyan:    #8be9fd; */
+/*   --green:   #50fa7b; */
+/*   --orange:  #ffb86c; */
+/*   --red:     #ff5555; */
+/*   --yellow:  #f1fa8c; */
+/* } */
+
+/* /\* ============================================================================= */
+/*  * */
+/*  * Waybar configuration */
+/*  * */
+/*  * Configuration reference: https://github.com/Alexays/Waybar/wiki/Configuration */
+/*  * */
+/*  * =========================================================================== *\/ */
+
+/* /\* ----------------------------------------------------------------------------- */
+/*  * Keyframes */
+/*  * -------------------------------------------------------------------------- *\/ */
+
+/* @define-color highlight #685878 ; */
+/* @define-color base1  #19191e ; */
+
+/* @keyframes blink-warning { */
+/*     70% { */
+/*         color: white; */
+/*     } */
+
+/*     to { */
+/*         color: white; */
+/*         background-color: orange; */
+/*     } */
+/* } */
+
+/* @keyframes blink-critical { */
+/*     70% { */
+/*       color: white; */
+/*     } */
+
+/*     to { */
+/*         color: white; */
+/*         background-color: red; */
+/*     } */
+/* } */
+
+/* /\* ----------------------------------------------------------------------------- */
+/*  * Base styles */
+/*  * -------------------------------------------------------------------------- *\/ */
+
+/* /\* Reset all styles *\/ */
+/* * { */
+/*   border: none; */
+/*   border-radius: 0; */
+/*   min-height: 0; */
+/*   margin: 0;             /\* you had margin: 1px; remove it *\/ */
+/*   padding: 0; */
+/* } */
+
+/* /\* The whole bar *\/ */
+/* #waybar { */
+/*     background: transparent; */
+/*     color: #e3e3ea; */
+/*     background-color: @base1; */
+/*     font-family: JetBrainsMono; */
+/*     font-size: 11px;       /\* i3 swaybar vibe *\/ */
+/* } */
+
+/* /\* Compact default module spacing (vertical 0) *\/ */
+/* #mode, */
+/* #network, */
+/* #custom-keyboard-layout, */
+/* #idle_inhibitor, */
+/* #cpu, */
+/* #memory, */
+/* #backlight, */
+/* #pulseaudio, */
+/* #battery, */
+/* #clock, */
+/* #tray { */
+/*   padding: 0 6px;        /\* no vertical padding, small horizontal *\/ */
+/*   margin: 0; */
+/* } */
+/* /\* ----------------------------------------------------------------------------- */
+/*  * Module styles */
+/*  * -------------------------------------------------------------------------- *\/ */
+
+/* #custom-launcher { margin: 0 6px; } */
+/* #custom-power    { margin: 0 6px; font-size: 12px; }#custom-launcher { */
+/*     margin-left:15px; */
+/*     margin-right:10px; */
+/* } */
+
+
+/* #workspaces { */
+/*   font-size: 11px; */
+/* } */
+
+/* #workspaces button { */
+/*     border-radius: 5px; */
+/*     color: #eceff4; */
+/*     min-height: 0; */
+/*     padding: 0 4px; */
+/*     margin: 0 2px; */
+/*     border-radius: 3px; */
+/* } */
+
+/* #workspaces button.focused { */
+/*     border: 1px solid #d8dee9; */
+/* } */
+
+/* #workspaces button.urgent { */
+/*     border-color: #c9545d; */
+/*     color: #c9545d; */
+/* } */
+
+/* #mode { */
+/*     background: @highlight; */
+/*     border-bottom: 3px transparent; */
+/*     color:white; */
+/*     padding: 0 6px;        /\* was 7px all around *\/ */
+/*     margin-left: 4px; */
+/* } */
+
+/* #window { */
+/*     font-weight: bold; */
+/* } */
+
+/* #network.disconnected { */
+/*     color: orange; */
+/* } */
+
+/* #cpu.warning { */
+/*     color: orange; */
+/* } */
+
+/* #cpu.critical { */
+/*     color: red; */
+/* } */
+
+/* #memory { */
+/*     animation-timing-function: linear; */
+/*     animation-iteration-count: infinite; */
+/*     animation-direction: alternate; */
+/* } */
+
+/* #memory.warning { */
+/*     color: orange; */
+/*  } */
+
+/* #memory.critical { */
+/*     color: red; */
+/*     animation-name: blink-critical; */
+/*     animation-duration: 2s; */
+/*     padding-left:5px; */
+/*     padding-right:5px; */
+/* } */
+
+/* #backlight.icon { */
+/* } */
+
+/* #pulseaudio { */
+/* } */
+
+/* #pulseaudio.muted { */
+/*     color: @highlight; */
+/* } */
+
+/* #battery { */
+/*     animation-timing-function: linear; */
+/*     animation-iteration-count: infinite; */
+/*     animation-direction: alternate; */
+/* } */
+
+/* #battery.warning { */
+/*     color: orange; */
+/* } */
+
+/* #battery.critical { */
+/*     color: red; */
+/* } */
+
+/* #battery.warning.discharging { */
+/*     animation-name: blink-warning; */
+/*     animation-duration: 3s; */
+/* } */
+
+/* #battery.critical.discharging { */
+/*     animation-name: blink-critical; */
+/*     animation-duration: 2s; */
+/* } */
+
+/* /\* ==== Dracula x Swaybar (sharp, compact) ================================== *\/ */
+
+/* /\* Bar: small like swaybar *\/ */
+/* window#waybar, #waybar { */
+/*   background: var(--bg); */
+/*   color: var(--fg); */
+/*   font-family: JetBrainsMono, monospace; */
+/*   font-size: 11px; */
+/*   /\* height: 22px; *\/ */
+/*   /\* line-height: 22px; *\/ */
+/*   border: none; */
+/*   box-shadow: none; */
+/* } */
+
+/* /\* Global reset: sharp, no extra vertical space *\/ */
+/* * { */
+/*   border: 0; */
+/*   border-radius: 0; */
+/*   min-height: 0; */
+/*   margin: 0; */
+/*   padding: 0; */
+/* } */
+
+/* /\* Modules: slim, vertical-0, subtle separators like sway *\/ */
+/* #mode, #workspaces, #window, #tray, */
+/* #network, #idle_inhibitor, #cpu, #memory, #backlight, */
+/* #pulseaudio, #battery, #clock, #custom-power, #custom-keyboard-layout { */
+/*   padding: 0 8px; */
+/*   border-left: 1px solid var(--line); */
+/* } */
+/* .modules-left > *:first-child, */
+/* .modules-center > *:first-child, */
+/* .modules-right > *:first-child { border-left: 0; } */
+
+/* /\* Workspaces: tiny pills with underline on focused (sway vibe) *\/ */
+/* #workspaces { padding: 0 6px; } */
+/* #workspaces button { */
+/*   padding: 0 6px; */
+/*   margin: 0 2px; */
+/*   background: transparent; */
+/*   color: var(--fg); */
+/* } */
+/* #workspaces button.focused { */
+/*   color: var(--fg); */
+/*   background: transparent; */
+/*   border-bottom: 2px solid var(--accent); */
+/* } */
+/* #workspaces button.visible:not(.focused) { */
+/*   border-bottom: 2px solid var(--line); */
+/* } */
+/* #workspaces button.urgent { */
+/*   color: var(--red); */
+/*   border-bottom: 2px solid var(--red); */
+/* } */
+
+/* /\* Mode block (resize mode etc.) *\/ */
+/* #mode { */
+/*   color: var(--bg); */
+/*   background: var(--accent); */
+/*   border-left: 0; */
+/* } */
+
+/* /\* Window title: ellipsis, no bloat *\/ */
+/* #window { */
+/*   padding: 0 10px; */
+/* } */
+/* #window, */
+/* #window * { */
+/*   text-overflow: ellipsis; */
+/*   overflow: hidden; */
+/*   white-space: nowrap; */
+/* } */
+
+/* /\* Status colors (subtle, not neon) *\/ */
+/* #network.disconnected, #cpu.warning, #memory.warning, #battery.warning { color: var(--orange); } */
+/* #cpu.critical, #memory.critical, #battery.critical { color: var(--red); } */
+/* #pulseaudio.muted { color: var(--accent); } */
+
+/* /\* Tray looks like the rest (no padding inflation) *\/ */
+/* #tray { padding: 0 6px; } */
+
+/* /\* Tooltips Dracula’d *\/ */
+/* tooltip { */
+/*   background: var(--bg-alt); */
+/*   color: var(--fg); */
+/*   border: 1px solid var(--line); */
+/* } */

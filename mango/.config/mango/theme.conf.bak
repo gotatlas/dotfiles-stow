@@ -1,0 +1,5 @@
+shadowscolor= 0x000000ff
+rootcolor=0x282a36ff
+bordercolor=0x44475aff
+focuscolor=0x837faaff
+urgentcolor=0xff5555ff

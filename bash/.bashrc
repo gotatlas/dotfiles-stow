@@ -12,17 +12,17 @@ PS1='[\u@\h \W]\$ '
 #export GTK_THEME=Dracula
 
 # NVM
-source /usr/share/nvm/init-nvm.sh
+#source /usr/share/nvm/init-nvm.sh
 
 # GO
-export PATH="$PATH:$(go env GOPATH)/bin"
+#export PATH="$PATH:$(go env GOPATH)/bin"
 
 # FZF
 eval "$(fzf --bash)"
 export FZF_DEFAULT_OPTS="--height=40% --layout=reverse --border --preview 'bat --style=numbers --color=always {} | head -500'"
 
 # Browser
-export BROWSER="firefox"
+export BROWSER="vivaldi-stable"
 
 # Editor
 export EDITOR="doom-now"
@@ -77,6 +77,13 @@ gropen() {
   else
     emacs -- "$f"
   fi
+}
+
+stowcfg() {
+  local app="$1"
+  mkdir -p "$HOME/.dotfiles/$app/.config"
+  mv "$HOME/.config/$app" "$HOME/.dotfiles/$app/.config/" || return 1
+  (cd "$HOME/.dotfiles" && stow "$app")
 }
 
 # --- Doom Emacs daemon config ---

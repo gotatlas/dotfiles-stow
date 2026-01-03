@@ -1,0 +1,91 @@
+{
+    (
+        modifiers: [
+            Super,
+            Shift,
+        ],
+        key: "Escape",
+    ): Disable,
+    (
+        modifiers: [
+            Super,
+        ],
+        key: "q",
+    ): Disable,
+    (
+        modifiers: [
+            Super,
+            Shift,
+        ],
+        key: "q",
+    ): Close,
+    (
+        modifiers: [
+            Super,
+            Shift,
+        ],
+        key: "e",
+    ): System(LogOut),
+    (
+        modifiers: [
+            Super,
+        ],
+        key: "Return",
+    ): System(Terminal),
+    (
+        modifiers: [
+            Super,
+            Shift,
+        ],
+        key: "s",
+    ): System(Screenshot),
+    (
+        modifiers: [
+            Super,
+        ],
+        key: "f",
+    ): Maximize,
+    (
+        modifiers: [
+            Super,
+        ],
+        key: "t",
+    ): Disable,
+    (
+        modifiers: [
+            Super,
+        ],
+        key: "p",
+    ): ToggleSticky,
+    (
+        modifiers: [
+            Super,
+            Shift,
+        ],
+        key: "l",
+    ): System(LockScreen),
+    (
+        modifiers: [
+            Super,
+        ],
+        key: "m",
+    ): Minimize,
+    (
+        modifiers: [
+            Super,
+        ],
+    ): Disable,
+    (
+        modifiers: [
+            Super,
+        ],
+        key: "Escape",
+    ): System(LogOut),
+    (
+        modifiers: [
+            Super,
+        ],
+        key: "d",
+        description: Some("fuzzel"),
+    ): Spawn("fuzzel --show drun"),
+}

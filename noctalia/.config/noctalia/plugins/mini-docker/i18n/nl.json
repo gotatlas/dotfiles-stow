@@ -1,0 +1,28 @@
+{
+  "intervals": {
+    "10_seconds": "10 seconden",
+    "1_second": "1 seconde",
+    "30_seconds": "30 seconden",
+    "5_seconds": "5 seconden"
+  },
+  "settings": {
+    "current_value": "Geselecteerd: {value} ms",
+    "general": "Algemeen",
+    "refresh_interval_description": "Hoe vaak de plugin de containerstatus controleert",
+    "refresh_interval_label": "Vernieuwingsinterval",
+    "title": "Container Manager Instellingen"
+  },
+  "tooltip": {
+    "docker_not_available": "Docker niet beschikbaar",
+    "running_containers": "Lopende containers: %1"
+  },
+  "ui": {
+    "containers": "Containers",
+    "prune": "Opschonen",
+    "refresh": "Vernieuwen",
+    "remove": "Verwijderen",
+    "start": "Starten",
+    "stop": "Stoppen",
+    "volumes": "Volumes"
+  }
+}

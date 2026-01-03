@@ -1,0 +1,107 @@
+[
+    (
+        output: (
+            name: "eDP-1",
+            edid: Some((
+                manufacturer: ('C', 'M', 'N'),
+                product: 5472,
+                serial: None,
+                manufacture_week: 9,
+                manufacture_year: 2023,
+                model_year: None,
+            )),
+        ),
+        tiling_enabled: true,
+        id: None,
+    ),
+    (
+        output: (
+            name: "eDP-1",
+            edid: Some((
+                manufacturer: ('C', 'M', 'N'),
+                product: 5472,
+                serial: None,
+                manufacture_week: 9,
+                manufacture_year: 2023,
+                model_year: None,
+            )),
+        ),
+        tiling_enabled: true,
+        id: None,
+    ),
+    (
+        output: (
+            name: "eDP-1",
+            edid: Some((
+                manufacturer: ('C', 'M', 'N'),
+                product: 5472,
+                serial: None,
+                manufacture_week: 9,
+                manufacture_year: 2023,
+                model_year: None,
+            )),
+        ),
+        tiling_enabled: true,
+        id: None,
+    ),
+    (
+        output: (
+            name: "eDP-1",
+            edid: Some((
+                manufacturer: ('C', 'M', 'N'),
+                product: 5472,
+                serial: None,
+                manufacture_week: 9,
+                manufacture_year: 2023,
+                model_year: None,
+            )),
+        ),
+        tiling_enabled: true,
+        id: None,
+    ),
+    (
+        output: (
+            name: "eDP-1",
+            edid: Some((
+                manufacturer: ('C', 'M', 'N'),
+                product: 5472,
+                serial: None,
+                manufacture_week: 9,
+                manufacture_year: 2023,
+                model_year: None,
+            )),
+        ),
+        tiling_enabled: true,
+        id: None,
+    ),
+    (
+        output: (
+            name: "eDP-2",
+            edid: Some((
+                manufacturer: ('C', 'M', 'N'),
+                product: 5668,
+                serial: None,
+                manufacture_week: 27,
+                manufacture_year: 2022,
+                model_year: None,
+            )),
+        ),
+        tiling_enabled: true,
+        id: Some("696988"),
+    ),
+    (
+        output: (
+            name: "eDP-2",
+            edid: Some((
+                manufacturer: ('C', 'M', 'N'),
+                product: 5668,
+                serial: None,
+                manufacture_week: 27,
+                manufacture_year: 2022,
+                model_year: None,
+            )),
+        ),
+        tiling_enabled: true,
+        id: Some("f13998"),
+    ),
+]

@@ -110,7 +110,7 @@ Item {
         id: panelContainer
 
         anchors.fill: parent
-        color: Color.transparent
+        color: "transparent"
 
         Rectangle {
             anchors.fill: parent
@@ -178,7 +178,7 @@ Item {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 60 * Style.uiScaleRatio
-                        color: Color.transparent
+                        color: "transparent"
 
                         RowLayout {
                             anchors.fill: parent
@@ -429,7 +429,7 @@ Item {
         property int idx
         Layout.fillWidth: true
         Layout.preferredHeight: 40 * Style.uiScaleRatio
-        color: root.currentTabIndex === idx ? Color.mSurface : Color.transparent
+        color: root.currentTabIndex === idx ? Color.mSurface : "transparent"
         radius: Style.radiusS
 
         Rectangle {
@@ -471,7 +471,7 @@ Item {
             hoverEnabled: true
             onClicked: root.currentTabIndex = idx
             onEntered: if (root.currentTabIndex !== idx) parent.color = Qt.rgba(1, 1, 1, 0.05);
-            onExited: if (root.currentTabIndex !== idx) parent.color = Color.transparent;
+            onExited: if (root.currentTabIndex !== idx) parent.color = "transparent";
         }
     }
 }

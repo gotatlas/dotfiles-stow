@@ -1,0 +1,42 @@
+[Desktop Entry]
+Name=Cursor (2.6.22)
+Comment=The AI Code Editor.
+GenericName=Text Editor
+Exec=firejail --appimage --private=/home/atlas/cursor/cursor-sandbox --whitelist=/home/atlas/cursor-sandbox /home/atlas/Applications/Cursor-2.6.22-x86_64.AppImage %F
+Icon=appimagekit_3ec3ab1c9a9d6ec35984fc3366019072_co.anysphere.cursor
+Type=Application
+StartupNotify=false
+StartupWMClass=Cursor
+Categories=TextEditor;Development;IDE;
+MimeType=application/x-cursor-workspace;
+Actions=new-empty-window;AppImageLauncher-Remove-AppImage;
+Keywords=cursor;
+
+X-AppImage-Version=2.6.22
+
+TryExec=/home/atlas/Applications/Cursor-2.6.22-x86_64.AppImage
+X-AppImage-Old-Icon=co.anysphere.cursor
+X-AppImage-Old-Name=Cursor
+X-AppImage-Identifier=3ec3ab1c9a9d6ec35984fc3366019072
+X-AppImageLauncher-Version=3.0.0-beta-2 (git commit release/tag), built on 2025-12-18 19:29:08 UTC
+[Desktop Action new-empty-window]
+Name=New Empty Window
+Name[cs]=Nové prázdné okno
+Name[de]=Neues leeres Fenster
+Name[es]=Nueva ventana vacía
+Name[fr]=Nouvelle fenêtre vide
+Name[it]=Nuova finestra vuota
+Name[ja]=新しい空のウィンドウ
+Name[ko]=새 빈 창
+Name[ru]=Новое пустое окно
+Name[zh_CN]=新建空窗口
+Name[zh_TW]=開新空視窗
+Exec=/home/atlas/Applications/Cursor-2.6.22-x86_64.AppImage --new-window %F
+Icon=appimagekit_3ec3ab1c9a9d6ec35984fc3366019072_co.anysphere.cursor
+
+X-AppImage-Old-Icon=co.anysphere.cursor
+
+[Desktop Action AppImageLauncher-Remove-AppImage]
+Name=Delete this AppImage
+Icon=AppImageLauncher
+Exec=/usr/lib/appimagelauncher/remove "/home/atlas/Applications/Cursor-2.6.22-x86_64.AppImage"

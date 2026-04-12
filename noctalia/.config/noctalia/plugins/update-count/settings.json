@@ -1,8 +1,0 @@
-{
-  "updateIntervalMinutes": 30,
-  "updateTerminalCommand": "alacritty -e",
-  "currentIconName": "world-download",
-  "hideOnZero": false,
-  "customCmdGetNumUpdates": "",
-  "customCmdDoSystemUpdate": ""
-}

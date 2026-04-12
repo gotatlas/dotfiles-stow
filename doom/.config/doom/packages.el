@@ -3,6 +3,11 @@
 
 (package! rainbow-delimiters)
 (package! org-download)
+
+(package! odin-mode
+  :recipe (:host github :repo "mattt-b/odin-mode"))
+;; (package! odin-ts-mode
+;;   :recipe (:host github :repo "Sampie159/odin-ts-mode"))
 ;; (package! dirvish)
 ;; To install a package:
 ;;

@@ -7,11 +7,12 @@
     "niri/window"
   ],
   "modules-center": [
-    "privacy",
   ],
   "modules-right": [
+    "privacy",
+    "tray",
     // "mpris",
-    //"custom/sep",
+    "custom/sep",
     //"custom/sep",
     "custom/mic",
     "custom/sep",
@@ -30,8 +31,7 @@
     "disk",
     "custom/sep",
     "clock"
-    //"custom/sep",
-    //"tray"
+    // "custom/sep",
   ],
   "niri/workspaces": {
     "format": "{index}",
@@ -86,18 +86,18 @@
     "scrolllock": false
   },
   "clock": {
-    "format": "{:%H:%M}  ",
+    "format": "{:%a %m-%d-%y %H:%M}",
     "format-alt": "{:%a %m-%d-%y %H:%M}",
     "tooltip-format": "<big>{:%B %Y}</big>\n{calendar}"
   },
   "cpu": {
-    "format": "{usage}% ",
+    "format": "{usage}%",
     "interval": 5,
     "tooltip": true,
     //"on-click": "alacritty -e cpu-auto"
   },
   "memory": {
-    "format": "{used}GiB ",
+    "format": "{used}GiB",
     "interval": 5,
     "tooltip": true,
     "on-click": "alacritty -e btop"
@@ -105,7 +105,7 @@
   "disk": {
     "interval": 60,
     "path": "/",
-    "format": "{free} 󰋊",
+    "format": "{free}",
     "on-click": "thunar ~"
   },
   "battery": {
@@ -120,7 +120,7 @@
   },
   "network": {
     "format": "Online",
-    "format-disconnected": "Disconnected ⚠"
+    "format-disconnected": "Disconnected"
   },
   "ext/workspaces": {
     "format": "{icon}",

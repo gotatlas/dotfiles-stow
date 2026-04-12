@@ -9,10 +9,11 @@
 
 environment {
     // GTK theming
-    GTK_THEME "Ant-Dracula"
+    // GTK_THEME "Ant-Dracula"
     // GTK_ICON_THEME "Dracula"
-    GTK_ICON_THEME "DraculaStack"
-    GTK_CURSOR_THEME "Qogir-Dark"
+    GTK_ICON_THEME "Dracula"
+    QS_ICON_THEME "Dracula"
+    // GTK_CURSOR_THEME "Qogir-Dark"
     // GDK_BACKEND "wayland,x11,*"
 
     // Qt
@@ -30,13 +31,15 @@ cursor {
     xcursor-theme "Qogir-Dark"
     xcursor-size 24
 
-    hide-after-inactive-ms 1000
+    // hide-after-inactive-ms 1000
 }
 
-// overview {
-//     zoom 0.5 // default
-//     // backdrop-color "#777777"
-// }
+overview {
+    zoom 0.3 // default
+    // backdrop-color "#1E1F29"
+    // backdrop-color "#20222B"
+    // backdrop-color "#1A1B23"
+}
 
 input {
     keyboard {
@@ -48,8 +51,9 @@ input {
             // layout "us,ru"
             // options "grp:win_space_toggle,compose:ralt,ctrl:nocaps"
             layout "us"
+            // variant "symbolic"
+            // options "compose:caps"
             options "caps:escape"
-
             // If this section is empty, niri will fetch xkb settings
             // from org.freedesktop.locale1. You can control these using
             // localectl set-x11-keymap.
@@ -63,18 +67,22 @@ input {
     // Omitting settings disables them, or leaves them at their default values.
     // All commented-out settings here are examples, not defaults.
     touchpad {
-        // off
         tap
         dwt
-        // dwtp
-        // drag false
-        // drag-lock
         natural-scroll
-        // accel-speed 0.2
-        // accel-profile "flat"
-        // scroll-method "two-finger"
-        // disabled-on-external-mouse
+        accel-profile "flat"
+        accel-speed 0.0
+        // drag false
+        scroll-method "two-finger"
+        // click-method "clickfinger"
     }
+    // touchpad {
+    //     tap
+    //     dwt
+    //     natural-scroll
+    //     accel-profile "flat"
+    //     accel-speed 0.0
+    // }
 
     mouse {
         // off
@@ -147,11 +155,12 @@ gestures {
     position x=1280 y=0
 }
 
-workspace "one"
-workspace "two"
-workspace "three"
-workspace "four"
-workspace "five"
+//workspace "zero"
+// workspace "one"
+// workspace "two"
+// workspace "three"
+// workspace "four"
+// workspace "five"
 
 // binds {
 //   Mod+1 { focus-workspace "one"; }
@@ -183,13 +192,13 @@ layout {
         // Proportion sets the width as a fraction of the output width, taking gaps into account.
         // For example, you can perfectly fit four windows sized "proportion 0.25" on an output.
         // The default preset widths are 1/3, 1/2 and 2/3 of the output. (added 2/5 and 3/5)
-        proportion 0.25
+        // proportion 0.25
         proportion 0.33333
-        proportion 0.4
+        // proportion 0.4
         proportion 0.5
-        proportion 0.6
+        // proportion 0.6
         proportion 0.66667
-        proportion 0.75
+        // proportion 0.75
 
         // Fixed sets the width in logical pixels exactly.
         // fixed 1920
@@ -199,7 +208,7 @@ layout {
     // preset-window-heights { }
 
     // You can change the default width of the new windows.
-    default-column-width { proportion 0.5; }
+    default-column-width { proportion 0.33333; }
     // If you leave the brackets empty, the windows themselves will decide their initial width.
     // default-column-width {}
 
@@ -336,6 +345,7 @@ layout {
 }
 debug {
     honor-xdg-activation-with-invalid-serial
+    disable-cursor-plane
 }
 
 recent-windows {
@@ -343,11 +353,13 @@ recent-windows {
     Alt+Tab       { next-window     scope="workspace"; }
     Alt+Shift+Tab { previous-window scope="workspace"; }
 
-    // Optional: keep the other scopes available
+    // Full Scope
     Alt+Ctrl+Tab       { next-window     scope="all"; }
     Alt+Ctrl+Shift+Tab { previous-window scope="all"; }
   }
 }
+
+// prefer-no-csd
 
 // Add lines like this to spawn processes at startup.
 // Note that running niri as a session supports xdg-desktop-autostart,
@@ -356,14 +368,25 @@ recent-windows {
 
 // This line starts waybar, a commonly used bar for Wayland compositors.
 // spawn-at-startup "systemctl" "--user" "start" "noctalia.service"
-spawn-at-startup "qs" "-c" "noctalia-shell"
-// spawn-at-startup "swaybg" "-i" "/home/atlas/.config/niri/background.png" "-m" "fill"
+// spawn-at-startup "dms run"
+// spawn-at-startup "qs" "-c" "noctalia-shell"
+
+// Minimal Setup
+spawn-at-startup "swaybg" "-i" "/home/atlas/.config/niri/background_1.png" "-m" "fill"
 spawn-at-startup "waybar" "-c" "/home/atlas/.config/niri/config.jsonc" "-s" "/home/atlas/.config/niri/style.css"
-// spawn-at-startup "mako"
-// spawn-at-startup "swayosd"
+spawn-at-startup "mako"
+// spawn-at-startup "swayosd-server" (needs libpinput or manual setup)
+spawn-at-startup "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
+spawn-at-startup "sh" "-c" "wl-paste --type text --watch cliphist store"
+spawn-at-startup "sh" "-c" "wl-paste --type image --watch cliphist store"
 
+// Niri Extensions
 spawn-at-startup "niri-float-sticky"
+spawn-at-startup "niriusd"
 
+// Daemons
+spawn-at-startup "foot" "--server"
+spawn-at-startup "emacs" "--daemon"
 
 // To run a shell command (with variables, pipes, etc.), use spawn-sh-at-startup:
 // spawn-sh-at-startup "qs -c ~/source/qs/MyAwesomeShell"
@@ -416,6 +439,8 @@ window-rule {
 // Extension Pop-ups
 window-rule {
     match app-id=r#"^firefox$"# title=r#"(Bitwarden|uBlock|KeePass|SponsorBlock|Extension)"#
+    match app-id=r#"^vivaldi(-stable)?$"# title=r#"(Bitwarden|uBlock|KeePass|SponsorBlock|Extension)"#
+    match title=r#"^(Extension:\s*)?.*\bBitwarden\b.*$"#
     open-floating true
 
     // Optional: keep them small and sane
@@ -425,6 +450,11 @@ window-rule {
     // min-width 420; max-width 420;
     // min-height 520; max-height 520;
 }
+
+// window-rule {
+//	match app-id="virt-viewer"
+//	draw-border-with-background false
+//}
 
 // Vivaldi (Chromium) usually uses vivaldi-stable (sometimes vivaldi)
 window-rule {
@@ -498,12 +528,20 @@ binds {
     Mod+Shift+Slash { show-hotkey-overlay; }
 
     // Suggested binds for running programs: terminal, app launcher, screen locker.
-    Mod+T                hotkey-overlay-title="Open a Terminal: wezterm" { spawn "wezterm"; }
-    Mod+Return           hotkey-overlay-title="Open a Terminal: foot" { spawn "foot"; }
+    Mod+T                hotkey-overlay-title="Open a Terminal (L): foot" { spawn "footclient"; }
+    Mod+Return           hotkey-overlay-title="Open a Terminal (R): foot" { spawn "footclient"; }
     // Mod+Shift+Return     hotkey-overlay-title="Open a Terminal: foot" { spawn "foot"; }
     Mod+D                hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
-    // Mod+Backslash  hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
-    Mod+Backslash        hotkey-overlay-title="Lock the Screen: Noctalia" { spawn-sh "qs -c noctalia-shell ipc call lockScreen lock"; }
+    // Mod+D                hotkey-overlay-title="Open Overview" repeat=false { toggle-overview; }
+    Mod+Backslash  hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
+    // Mod+Backslash        hotkey-overlay-title="Lock the Screen: Noctalia" { spawn-sh "qs -c noctalia-shell ipc call lockScreen lock"; }
+    // Mod+Backslash        hotkey-overlay-title="Lock the Screen: DMS" { spawn "dms" "ipc" "call" "lock" "lock"; }
+
+    // Utilities
+    Mod+H hotkey-overlay-title="Clipboard History" { spawn-sh "cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"; }
+    //Mod+H hotkey-overlay-title="Clipboard History: DMS" {
+    //    spawn "dms" "ipc" "call" "clipboard" "toggle";
+    //}
 
     // Use spawn-sh to run a shell command. Do this if you need pipes, multiple commands, etc.
     // Note: the entire command goes as a single argument. It's passed verbatim to `sh -c`.
@@ -535,7 +573,7 @@ binds {
     // Open/close the Overview: a zoomed-out view of workspaces and windows.
     // You can also move the mouse into the top-left hot corner,
     // or do a four-finger swipe up on a touchpad.
-    Mod+O repeat=false { toggle-overview; }
+    Mod+Escape repeat=false { toggle-overview; }
 
     Mod+Shift+Q repeat=false { close-window; }
 
@@ -549,10 +587,10 @@ binds {
     Mod+Shift+Tab   { move-window-down; }
     Mod+Shift+Grave { move-window-up; }
 
-    Mod+H     { focus-column-left; }
-    Mod+J     { focus-window-down; }
-    Mod+K     { focus-window-up; }
-    Mod+L     { focus-column-right; }
+    // Mod+H     { focus-column-left; }
+    // Mod+J     { focus-window-down; }
+    // Mod+K     { focus-window-up; }
+    // Mod+L     { focus-column-right; }
 
 
 
@@ -561,10 +599,10 @@ binds {
     // Mod+Shift+Up    { move-window-up; }
     Mod+Shift+Right { move-column-right; }
 
-    Mod+Shift+H     { move-column-left; }
-    Mod+Shift+J     { move-window-down; }
-    Mod+Shift+K     { move-window-up; }
-    Mod+Shift+L     { move-column-right; }
+    // Mod+Shift+H     { move-column-left; }
+    // Mod+Shift+J     { move-window-down; }
+    // Mod+Shift+K     { move-window-up; }
+    // Mod+Shift+L     { move-column-right; }
 
     // Alternative commands that move across workspaces when reaching
     // the first or last window in a column.
@@ -583,10 +621,10 @@ binds {
     Mod+Ctrl+Shift+Left   { move-column-to-first; }
     Mod+Ctrl+Shift+Right  { move-column-to-last; }
 
-    Mod+Ctrl+H         { focus-column-first; }
-    Mod+Ctrl+L        { focus-column-last; }
-    Mod+Ctrl+Shift+H   { move-column-to-first; }
-    Mod+Ctrl+Shift+L  { move-column-to-last; }
+    // Mod+Ctrl+H         { focus-column-first; }
+    // Mod+Ctrl+L        { focus-column-last; }
+    // Mod+Ctrl+Shift+H   { move-column-to-first; }
+    // Mod+Ctrl+Shift+L  { move-column-to-last; }
 
     Mod+A         { focus-column-first; }
     Mod+E        { focus-column-last; }
@@ -644,10 +682,10 @@ binds {
     Mod+Shift+Down       { move-column-to-workspace-down; }
     Mod+Shift+Up         { move-column-to-workspace-up; }
 
-    Mod+Ctrl+J             { focus-workspace-down; }
-    Mod+Ctrl+K               { focus-workspace-up; }
-    Mod+Ctrl+Shift+J       { move-column-to-workspace-down; }
-    Mod+Ctrl+Shift+K         { move-column-to-workspace-up; }
+    // Mod+Ctrl+J             { focus-workspace-down; }
+    // Mod+Ctrl+K               { focus-workspace-up; }
+    // Mod+Ctrl+Shift+J       { move-column-to-workspace-down; }
+    // Mod+Ctrl+Shift+K         { move-column-to-workspace-up; }
 
     // Alternatively, there are commands to move just a single window:
     // Mod+Ctrl+Page_Down { move-window-to-workspace-down; }
@@ -699,20 +737,46 @@ binds {
     //
     // For example, with 2 workspaces + 1 empty, indices 3, 4, 5 and so on
     // will all refer to the 3rd workspace.
-    Mod+1 { focus-workspace 1; }
-    Mod+2 { focus-workspace 2; }
-    Mod+3 { focus-workspace 3; }
-    Mod+4 { focus-workspace 4; }
-    Mod+5 { focus-workspace 5; }
-    Mod+6 { focus-workspace 6; }
-    Mod+7 { focus-workspace 7; }
-    Mod+8 { focus-workspace 8; }
-    Mod+9 { focus-workspace 9; }
+    // Mod+0 { focus-workspace 1;}
+    // Mod+1 { focus-workspace "one";}
+    // Mod+2 { focus-workspace "two";}
+    // Mod+3 { focus-workspace "three";}
+    // Mod+4 { focus-workspace "four";}
+    // Mod+5 { focus-workspace "five";}
+    // Mod+Shift+0 { move-column-to-workspace 1; }
+    // Mod+Shift+1 { move-column-to-workspace "one"; }
+    // Mod+Shift+2 { move-column-to-workspace "two"; }
+    // Mod+Shift+3 { move-column-to-workspace "three"; }
+    // Mod+Shift+4 { move-column-to-workspace "four"; }
+    // Mod+Shift+5 { move-column-to-workspace "five"; }
+    // Mod+0 { focus-workspace 1;}
+    Mod+1 { focus-workspace 1;}
+    Mod+2 { focus-workspace 2;}
+    Mod+3 { focus-workspace 3;}
+    Mod+4 { focus-workspace 4;}
+    Mod+5 { focus-workspace 5;}
+    // Mod+Shift+0 { move-column-to-workspace 1; }
     Mod+Shift+1 { move-column-to-workspace 1; }
     Mod+Shift+2 { move-column-to-workspace 2; }
     Mod+Shift+3 { move-column-to-workspace 3; }
     Mod+Shift+4 { move-column-to-workspace 4; }
     Mod+Shift+5 { move-column-to-workspace 5; }
+
+
+    // Mod+1 { focus-workspace 1; }
+    // Mod+2 { focus-workspace 2; }
+    // Mod+3 { focus-workspace 3; }
+    // Mod+4 { focus-workspace 4; }
+    // Mod+5 { focus-workspace 5; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+    // Mod+Shift+1 { move-column-to-workspace 1; }
+    // Mod+Shift+2 { move-column-to-workspace 2; }
+    // Mod+Shift+3 { move-column-to-workspace 3; }
+    // Mod+Shift+4 { move-column-to-workspace 4; }
+    // Mod+Shift+5 { move-column-to-workspace 5; }
     Mod+Shift+6 { move-column-to-workspace 6; }
     Mod+Shift+7 { move-column-to-workspace 7; }
     Mod+Shift+8 { move-column-to-workspace 8; }
@@ -743,6 +807,7 @@ binds {
 
     Mod+F { maximize-column; }
     Mod+Shift+F { fullscreen-window; }
+    Mod+Ctrl+Shift+F { toggle-windowed-fullscreen; }
 
     // Expand the focused column to space not taken up by other fully visible columns.
     // Makes the column "fill the rest of the space".
@@ -775,6 +840,9 @@ binds {
     Mod+G       { toggle-window-floating; }
     Mod+Shift+G { switch-focus-between-floating-and-tiling; }
 
+    Mod+V { spawn "nirius" "toggle-follow-mode"; }
+
+
     // Toggle tabbed column display mode.
     // Windows in this column will appear as vertical tabs,
     // rather than stacked on top of each other.
@@ -802,12 +870,16 @@ binds {
     // which ensures niri always processes them, even when an inhibitor is active.
     // Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
 
-    // The quit action will show a confirmation dialog to avoid accidental exits.
-    // Mod+Shift+E { quit; }
-    Mod+Escape { quit; }
 
     // Powers off the monitors. To turn them back on, do any input like
     // moving the mouse or pressing any other key.
-    Mod+Shift+P { power-off-monitors; }
+    Mod+P { power-off-monitors; }
+
+    // The quit action will show a confirmation dialog to avoid accidental exits.
+    // Mod+Shift+E { quit; }
+    Mod+Shift+P { quit; }
+
 }
-// include "./noctalia.kdl"
+
+include "./noctalia.kdl"
+

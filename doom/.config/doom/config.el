@@ -45,8 +45,8 @@
 ;; NOTE DOOM FONT
 
 ;;; Fonts (Fira Code stack)
-(setq doom-font                (font-spec :family "FiraCode Nerd Font" :size 16)
-      doom-variable-pitch-font (font-spec :family "Noto Sans"          :size 17)
+(setq doom-font                (font-spec :family "FiraCode Nerd Font" :size 14)
+      doom-variable-pitch-font (font-spec :family "Noto Sans"          :size 16)
       doom-symbol-font         (font-spec :family "Symbols Nerd Font Mono"))
 
 ;; Fallbacks (fonts-only path; no emojify, no unicode-fonts rewrites)
@@ -68,12 +68,12 @@
 
 ;; Remove CSD
 ;; Kill the window manager decorations (title bar, borders)
-(add-to-list 'default-frame-alist '(undecorated . t))
-(add-to-list 'initial-frame-alist '(undecorated . t))
+;; (add-to-list 'default-frame-alist '(undecorated . t))
+;; (add-to-list 'initial-frame-alist '(undecorated . t))
 
-;; If you use emacsclient/daemon, make new frames match too
-(add-hook 'after-make-frame-functions
-          (lambda (f) (set-frame-parameter f 'undecorated t)))
+;; ;; If you use emacsclient/daemon, make new frames match too
+;; (add-hook 'after-make-frame-functions
+;;           (lambda (f) (set-frame-parameter f 'undecorated t)))
 
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
 ;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
@@ -117,19 +117,8 @@
   :config
   (cua-mode 1))
 
-;; ;; Full CUA, no delay, keep selection after copy
-;; (setq cua-enable-cua-keys t
-;;       cua-keep-region-after-copy t
-;;       cua-prefix-override-inhibit-delay 0)  ;; 0 = no pause deciding C-x/C-c vs cut/copy
-
-;; (cua-mode 1)
-
-;; Kill flycheck
-;; (after! flycheck
-;;   (global-flycheck-mode -1))
-
 ;; Remove fringe
-(set-fringe-mode 0)
+; (set-fringe-mode 0)
 
 ;; Word wrap
 (setq-default word-wrap t
@@ -138,6 +127,11 @@
 
 (after! adaptive-wrap
   (adaptive-wrap-prefix-mode -1))
+
+;; Auto update
+(global-auto-revert-mode 1)
+(setq global-auto-revert-non-file-buffers t) ; helps for dired too
+
 
 ;; Doom scratch buffers
 (setq doom-scratch-initial-major-mode 'lisp-interaction-mode)
@@ -150,10 +144,10 @@
 (use-package! rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
 
-;; Multi-Cursor
-(setq mc/always-run-for-all t)
-(with-eval-after-load 'multiple-cursors
-  (define-key mc/keymap (kbd "<return>") nil)) ; prevent newline ending mc session
+;; ;; Multi-Cursor
+;; (setq mc/always-run-for-all t)
+;; (with-eval-after-load 'multiple-cursors
+;;   (define-key mc/keymap (kbd "<return>") nil)) ; prevent newline ending mc session
 
 ;; Org Download
 (use-package! org-download
@@ -287,10 +281,40 @@
 
 (after! vterm
   (add-hook! 'vterm-mode-hook
-    (setq-local buffer-read-only nil)
-    (read-only-mode -1)
     (when (bound-and-true-p vterm-copy-mode)
       (vterm-copy-mode -1))))
+
+(defun my/fix-tty-client-frames (frame)
+  "Make TTY frames created by emacsclient look sane."
+  (with-selected-frame frame
+    (unless (display-graphic-p frame)
+      ;; Force Emacs to decide dark/light correctly for this terminal.
+      ;; Pick one if you know your terminal is dark.
+      (set-terminal-parameter nil 'background-mode 'dark)
+      (tty-set-up-initial-frame-faces)
+      ;; Re-apply theme so faces aren't half-GUI, half-TTY.
+      (when (boundp 'custom-enabled-themes)
+        (mapc (lambda (th) (load-theme th t)) custom-enabled-themes)))))
+
+(add-hook 'after-make-frame-functions #'my/fix-tty-client-frames)
+
+(defun my/window-to-new-tab ()
+  "Move the current window's buffer into a new tab and delete this window in the old tab."
+  (interactive)
+  (let ((buf (current-buffer)))
+    (tab-bar-new-tab)
+    (switch-to-buffer buf)
+    (tab-bar-switch-to-prev-tab)
+    (delete-window)
+    (tab-bar-switch-to-next-tab)))
+
+(defun my/footclient-here ()
+  "Open footclient in `default-directory`."
+  (interactive)
+  (let ((dir (expand-file-name default-directory)))
+    (start-process "footclient-here" nil
+                   "footclient" "--working-directory" dir)))
+
 
 ;;; NOTE KEYBINDS
 ;; ORG
@@ -311,14 +335,15 @@
  ;; Comment line for ease of use (C-z is undo)
  "C-/"           #'comment-line
  ;; Replace C-v and M-v
- "C-,"           #'scroll-up-command
- "C-."           #'scroll-down-command
+ ;; "C-,"           #'scroll-up-command
+ ;; "C-."           #'scroll-down-command
  ;; Better undo
  "C-z"           #'undo-fu-only-undo
  "C-S-z"         #'undo-fu-only-redo
  ;; Flip for Ergonomics
- "C-y"           #'consult-yank-pop
- "M-y"           #'yank)
+ ;; "C-y"           #'consult-yank-pop
+ ;; "M-y"           #'yank
+)
 
 ;; Minor Mode Mods
 (after! (minibuffer vertico isearch)
@@ -336,6 +361,16 @@
       :prefix ("C-c d" . "my-org")
       :desc "Sentences → bullets" "b" #'org-sentences-to-bullets
       :desc "Convert region → table" "t" #'org-table-convert-region)
+
+;; Winmove Map
+(map! :after org
+      :map winmove-mode-map
+      :prefix ("C-c z" . "my-move")
+      :desc "Swap window left" "S-<left>" #'windmove-swap-states-left
+      :desc "Swap window right" "S-<right>" #'windmove-swap-states-right
+      :desc "Swap window up" "S-<up>" #'windmove-swap-states-up
+      :desc "Swap window down" "S-<down>" #'windmove-swap-states-down
+      )
 
 ;;F13 as my personal leader
 (defvar my/f6-map (make-sparse-keymap) "Prefix map for F13 leader.")
@@ -409,8 +444,8 @@
 
       )
 
-
-
+(use-package! odin-mode
+  :mode ("\\.odin\\'" . odin-mode))
       ;; "b" #'eval-buffer
       ;; "r" #'doom/reload
 

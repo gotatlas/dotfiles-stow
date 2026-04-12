@@ -59,14 +59,14 @@ window#waybar {
 
 #workspaces button {
     background-color: @blk;
-    padding: 0 4px;
+    padding: 0 3px;
     min-height: 0;
     color: @fg;
     background: transparent;
 }
 #workspaces button.active {
-    background-color: @blu;
-    color: @blk;
+    background-color: @cmt;
+    color: @fg;
     border-radius: 0px;
 }
 #workspaces button.empty {
@@ -87,10 +87,10 @@ window#waybar {
     background-color: @red;
 }
 
-button:hover {
-    background: inherit;
-    box-shadow: inset 0 -2px @fg;
-}
+/* button:hover { */
+/*     background: inherit; */
+/*     box-shadow: inset 0 -2px @fg; */
+/* } */
 
 #clock,
 #temperature,
@@ -106,17 +106,19 @@ button:hover {
 #mpris
 {
     padding: 0 6px;
-    color: @white;
+    color: @fg;
 }
 
 #privacy {
-    padding-left: 12px;
+    padding-right: 0px;
+    padding-left: 6px;
+    margin: 0px;
 }
 
 #custom-sep
 {
-    padding: 0 2px;
-    color: @brblk;
+    padding: 0;
+    color: @fg;
 }
 
 /* #center-sep-left { */
@@ -132,53 +134,53 @@ button:hover {
 }
 
 #battery {
-    color: @blu;
+    color: @fg;
     /* border-bottom: 3px solid @blu; */
 }
 
 #battery.warning {
-  color: @blu;
+  color: @fg;
   background-color: #ff79c6/* your warning_fg */
 }
 
 #battery.critical {
-  color: @blu;
+  color: @fg;
   background-color: #ff5555; /* Dracula red */
 }
 
 #pulseaudio {
-    color: @org;
+    color: @fg;
 }
 
 #disk {
-    color: @ylw;
+    color: @fg;
     /* border-bottom: 3px solid @ylw; */
 }
 
 #temperature {
-    color: @drac-azure1;
+    color: @fg;
         /* @cmt; */
     /* color: @amb-dark; */
 }
 
 #custom-mic {
-    color: @cyn;
+    color: @fg;
     padding-left: 8px;
         /* @drac-azure1; */
 }
 
 #memory {
-    color: @mag;
+    color: @fg;
     /* border-bottom: 3px solid @mag; */
 }
 
 #cpu {
-    color: @grn;
+    color: @fg;
     /* border-bottom: 3px solid @grn; */
 }
 
 #network {
-    color: @red;
+    color: @fg;
     /* border-bottom: 3px solid @red; */
 }
 
@@ -187,5 +189,6 @@ button:hover {
 }
 
 #tray {
-    background-color: @brblk;
+    background-color: @blk;
+    padding-right: 2px;
 }

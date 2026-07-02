@@ -4,11 +4,6 @@
 #
 # Read `man 5 sway` for a complete reference.
 font pango:JetBrainsMono Nerd Font 8
-# # class                 border  background text    indicator child_border
-# client.focused          #6272a4 #6272a4    #f8f8f2 #6272a4   #00000000
-# client.focused_inactive #44475a #44475a    #f8f8f2 #44475a   #00000000
-# client.unfocused        #282a36 #282a36    #f8f8f2 #282a36   #00000000
-# client.urgent           #ff5555 #ff5555    #f8f8f2 #ff5555   #00000000
 
 # class                 border  background text    indicator child_border
 client.focused          #6272a4 #6272a4    #f8f8f2 #6272a4   #44475a
@@ -25,43 +20,27 @@ set $mod Mod4
 # set $down j
 # set $up k
 # set $right l
+
 # Your preferred terminal emulator
-set $term alacritty
+set $term footclient
 # Your preferred application launcher
 set $menu fuzzel --show drun
 
-# # Make systemd-user inherit our real Wayland env on every login/reload
-# exec_always systemctl --user import-environment WAYLAND_DISPLAY DISPLAY XDG_RUNTIME_DIR
-# # Start the bridge after env is imported
-# exec_always systemctl --user start --no-block xwaylandvideobridge.service
-# Polkit for authentication 
-exec_always /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
+exec xfce4-power-manager
+exec waybar -c /home/atlas/sway/config.jsonc -s /home/atlas/sway/style.css
+exec mako
+exec nm-applet
 
-# Xwayland video bridge
-# exec_always pkill -x xwaylandvideobridge; xwaylandvideobridge &
-# exec_always sh -c 'pgrep -xu "$USER" xwaylandvideobridge >/dev/null || exec xwaylandvideobridge'
-exec_always sh -c 'pkill -xu "$USER" -f xwaylandvideobridge; sleep 0.2; exec xwaylandvideobridge --no-window &'
-# Not sure if working
-exec_always xfce4-power-manager &
+exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 
-# Notifications
-exec_always mako
-
-# Emacs
 # exec --no-startup-id emacs --daemon
-exec_always env DOOMDIR=$HOME/.config/doom emacs --fg-daemon=doom --init-directory=$HOME/.config/doom-emacs
-
-exec --no-startup-id swaymsg 'workspace 1; exec alacritty'
-exec --no-startup-id swaymsg 'workspace 2; exec firefox'
-exec --no-startup-id swaymsg 'workspace 5; exec discord'
-# Loads slower than the others
-# exec --no-startup-id swaymsg 'workspace 3; exec emacsclient -c -a ""'
-
+exec env DOOMDIR=$HOME/.config/doom emacs --fg-daemon=doom --init-directory=$HOME/.config/doom-emacs
+exec foot --server
 
 ### Output configuration
 #
 # Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
-output * bg ~/Pictures/Wallpapers/base.png fill
+output * bg ~/Pictures/Wallpapers/shizukubilfday.png fill
 #
 # Example configuration:
 #
@@ -84,7 +63,7 @@ output * bg ~/Pictures/Wallpapers/base.png fill
 
 ### Input configuration
 input * {
-    xkb_options caps:hyper
+    xkb_options compose:caps
 }
 # Example configuration:
 #
@@ -192,8 +171,8 @@ input type:keyboard {
     # Note: workspaces can have any name you want, not just numbers.
     # We just use 1-10 as the default.
 
-    bindgesture swipe:4:left  workspace next
-    bindgesture swipe:4:right workspace prev
+    bindgesture swipe:3:left  workspace next
+    bindgesture swipe:3:right workspace prev
 
     #bindsym $mod+backslash move container to workspace hidden
     #bindsym $mod+bracketright move container to scratchpad
@@ -287,10 +266,10 @@ mode "resize" {
     # bindsym $right resize grow width 10px
 
     # Ditto, with arrow keys
-    bindsym Left resize shrink width 10px
-    bindsym Down resize grow height 10px
-    bindsym Up resize shrink height 10px
-    bindsym Right resize grow width 10px
+    bindsym Left resize shrink width 20px
+    bindsym Down resize grow height 20px
+    bindsym Up resize shrink height 20px
+    bindsym Right resize grow width 20px
 
     # Return to default mode
     bindsym Return mode "default"
@@ -351,28 +330,32 @@ bindsym $mod+Shift+n exec makoctl restore
 # hide_edge_borders both
 # smart_borders on
 
+default_border pixel 1
+default_floating_border pixel 1
+# waybar -c ~/.config/niri/config.jsonc -s ~/.config/niri/style.css
 
-bar {
-    position bottom
-    font pango:JetBrainsMono Nerd Font 8
-
-    # When the status_command prints a new line to stdout, swaybar updates.
-    # The default just shows the current date and time.
-    # status_command while date +'%Y-%m-%d %X'; do sleep 1; done
-    # workspace_buttons no
-    # status_command python3 -u ~/.config/sway/pythonblocks.py
-    status_command i3status-rs ~/.config/i3status-rust/config.toml
-
-    colors {
-        background #282a36
-        statusline #f8f8f2
-        separator  #44475a
-
-        focused_workspace  #6272a4 #6272a4 #f8f8f2
-        inactive_workspace #44475a #44475a #f8f8f2
-        urgent_workspace   #ff5555 #ff5555 #f8f8f2
-    }
-}
+# bar {
+#     position top
+#     font pango:JetBrainsMono Nerd Font 8
+#     height 18
+# 
+#     # When the status_command prints a new line to stdout, swaybar updates.
+#     # The default just shows the current date and time.
+#     # status_command while date +'%Y-%m-%d %X'; do sleep 1; done
+#     # workspace_buttons no
+#     # status_command python3 -u ~/.config/sway/pythonblocks.py
+#     # status_command i3status-rs ~/.config/i3status-rust/config.toml
+# 
+#     colors {
+#         background #282a36
+#         statusline #f8f8f2
+#         separator  #44475a
+# 
+#         focused_workspace  #6272a4 #6272a4 #f8f8f2
+#         inactive_workspace #44475a #44475a #f8f8f2
+#         urgent_workspace   #ff5555 #ff5555 #f8f8f2
+#     }
+# }
 # bar {
 #     swaybar_command waybar
 # }

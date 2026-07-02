@@ -1,6 +1,7 @@
 {
   "layer": "top",
   "position": "top",
+  "height": 10,
   "modules-left": [
     "niri/workspaces",
     // "custom/sep",
@@ -34,8 +35,11 @@
     // "custom/sep",
   ],
   "niri/workspaces": {
-    "format": "{index}",
     "all-outputs": true
+  },
+  "tray": {
+    "icon-size": 11,
+    "spacing": 2
   },
   "mpris": {
     "format": "[  ]",              // playing

@@ -2,10 +2,10 @@
   "layer": "top",
   "position": "top",
   "modules-left": [
-    "ext/workspaces",
-    // "dwl/window#layout",
+    "sway/workspaces",
     // "custom/sep",
-    "dwl/window#title"
+    "sway/mode",
+    "sway/window"
   ],
   "modules-center": [
   ],

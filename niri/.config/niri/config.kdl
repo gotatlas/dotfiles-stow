@@ -11,8 +11,8 @@ environment {
     // GTK theming
     // GTK_THEME "Ant-Dracula"
     // GTK_ICON_THEME "Dracula"
-    GTK_ICON_THEME "Dracula"
-    QS_ICON_THEME "Dracula"
+    //GTK_ICON_THEME "Dracula"
+    //QS_ICON_THEME "Dracula"
     // GTK_CURSOR_THEME "Qogir-Dark"
     // GDK_BACKEND "wayland,x11,*"
 
@@ -28,8 +28,8 @@ environment {
 }
 
 cursor {
-    xcursor-theme "Qogir-Dark"
-    xcursor-size 24
+    // xcursor-theme "Qogir-Dark"
+    // xcursor-size 24
 
     // hide-after-inactive-ms 1000
 }
@@ -53,7 +53,8 @@ input {
             layout "us"
             // variant "symbolic"
             // options "compose:caps"
-            options "caps:escape"
+            options "caps:ctrl_modifier,compose:menu"
+            // options "caps:escape"
             // If this section is empty, niri will fetch xkb settings
             // from org.freedesktop.locale1. You can control these using
             // localectl set-x11-keymap.
@@ -71,10 +72,11 @@ input {
         dwt
         natural-scroll
         accel-profile "flat"
-        accel-speed 0.0
+        accel-speed 0.2
         // drag false
         scroll-method "two-finger"
         // click-method "clickfinger"
+	    scroll-factor 0.3
     }
     // touchpad {
     //     tap
@@ -156,11 +158,15 @@ gestures {
 }
 
 //workspace "zero"
-// workspace "one"
-// workspace "two"
-// workspace "three"
-// workspace "four"
-// workspace "five"
+workspace "9"
+workspace "8"
+workspace "7"
+workspace "6"
+workspace "5"
+workspace "4"
+workspace "3"
+workspace "2"
+workspace "1"
 
 // binds {
 //   Mod+1 { focus-workspace "one"; }
@@ -350,8 +356,11 @@ debug {
 
 recent-windows {
   binds {
-    Alt+Tab       { next-window     scope="workspace"; }
-    Alt+Shift+Tab { previous-window scope="workspace"; }
+    Alt+Tab       { next-window  filter="app-id" scope="all"; }
+    Alt+Shift+Tab { previous-window filter="app-id" scope="all"; }
+
+    Alt+grave { next-window filter="app-id" scope="workspace"; }
+    Alt+Shift+grave { previous-window filter="app-id" scope="workspace"; }
 
     // Full Scope
     Alt+Ctrl+Tab       { next-window     scope="all"; }
@@ -368,11 +377,11 @@ recent-windows {
 
 // This line starts waybar, a commonly used bar for Wayland compositors.
 // spawn-at-startup "systemctl" "--user" "start" "noctalia.service"
-// spawn-at-startup "dms run"
+// spawn-at-startup "sh" "-c" "dms run"
 // spawn-at-startup "qs" "-c" "noctalia-shell"
 
 // Minimal Setup
-spawn-at-startup "swaybg" "-i" "/home/atlas/.config/niri/background_1.png" "-m" "fill"
+spawn-at-startup "swaybg" "-i" "/home/atlas/.config/niri/background_2.png" "-m" "fill"
 spawn-at-startup "waybar" "-c" "/home/atlas/.config/niri/config.jsonc" "-s" "/home/atlas/.config/niri/style.css"
 spawn-at-startup "mako"
 // spawn-at-startup "swayosd-server" (needs libpinput or manual setup)
@@ -472,11 +481,14 @@ window-rule {
     match title=r#"Picture in picture"#
     open-floating true
 
+	opacity 0.85
+
     // Force the size (min=max means "stay this size")
-    min-width 290
-    // max-width 290
-    min-height 167
-    // max-height 167
+    //min-width 290
+    //min-height 167
+    min-width 100 //experiment
+    min-height 80
+    // no max-width / max-height
 
     // Bottom-left corner, with a little padding
     default-floating-position x=20 y=20 relative-to="bottom-right"
@@ -497,6 +509,12 @@ window-rule {
 
     // Use this instead if you want them visible on third-party screenshot tools.
     // block-out-from "screencast"
+}
+
+window-rule {
+    match app-id=r#"gui.GuiManager"#
+
+    open-floating true
 }
 
 // Example: enable rounded corners for all windows.
@@ -532,6 +550,7 @@ binds {
     Mod+Return           hotkey-overlay-title="Open a Terminal (R): foot" { spawn "footclient"; }
     // Mod+Shift+Return     hotkey-overlay-title="Open a Terminal: foot" { spawn "foot"; }
     Mod+D                hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
+    Mod+Shift+D                hotkey-overlay-title="Jump to Application: fuzzel" { spawn-sh "~/.config/niri/niri-window-switcher.sh"; }
     // Mod+D                hotkey-overlay-title="Open Overview" repeat=false { toggle-overview; }
     Mod+Backslash  hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
     // Mod+Backslash        hotkey-overlay-title="Lock the Screen: Noctalia" { spawn-sh "qs -c noctalia-shell ipc call lockScreen lock"; }
@@ -737,12 +756,16 @@ binds {
     //
     // For example, with 2 workspaces + 1 empty, indices 3, 4, 5 and so on
     // will all refer to the 3rd workspace.
-    // Mod+0 { focus-workspace 1;}
-    // Mod+1 { focus-workspace "one";}
-    // Mod+2 { focus-workspace "two";}
-    // Mod+3 { focus-workspace "three";}
-    // Mod+4 { focus-workspace "four";}
-    // Mod+5 { focus-workspace "five";}
+    Mod+0 { focus-workspace 1;}
+    Mod+1 { focus-workspace "1";}
+    Mod+2 { focus-workspace "2";}
+    Mod+3 { focus-workspace "3";}
+    Mod+4 { focus-workspace "4";}
+    Mod+5 { focus-workspace "5";}
+    Mod+6 { focus-workspace "6";}
+    Mod+7 { focus-workspace "7";}
+    Mod+8 { focus-workspace "8";}
+    Mod+9 { focus-workspace "9";}
     // Mod+Shift+0 { move-column-to-workspace 1; }
     // Mod+Shift+1 { move-column-to-workspace "one"; }
     // Mod+Shift+2 { move-column-to-workspace "two"; }
@@ -750,17 +773,22 @@ binds {
     // Mod+Shift+4 { move-column-to-workspace "four"; }
     // Mod+Shift+5 { move-column-to-workspace "five"; }
     // Mod+0 { focus-workspace 1;}
-    Mod+1 { focus-workspace 1;}
-    Mod+2 { focus-workspace 2;}
-    Mod+3 { focus-workspace 3;}
-    Mod+4 { focus-workspace 4;}
-    Mod+5 { focus-workspace 5;}
-    // Mod+Shift+0 { move-column-to-workspace 1; }
-    Mod+Shift+1 { move-column-to-workspace 1; }
-    Mod+Shift+2 { move-column-to-workspace 2; }
-    Mod+Shift+3 { move-column-to-workspace 3; }
-    Mod+Shift+4 { move-column-to-workspace 4; }
-    Mod+Shift+5 { move-column-to-workspace 5; }
+    // Mod+1 { focus-workspace 1;}
+    // Mod+2 { focus-workspace 2;}
+    // Mod+3 { focus-workspace 3;}
+    // Mod+4 { focus-workspace 4;}
+    // Mod+5 { focus-workspace 5;}
+    Mod+Shift+0 { move-column-to-workspace 1; }
+    Mod+Shift+1 { move-column-to-workspace "1"; }
+    Mod+Shift+2 { move-column-to-workspace "2"; }
+    Mod+Shift+3 { move-column-to-workspace "3"; }
+    Mod+Shift+4 { move-column-to-workspace "4"; }
+    Mod+Shift+5 { move-column-to-workspace "5"; }
+    Mod+Shift+6 { move-column-to-workspace "6"; }
+    Mod+Shift+7 { move-column-to-workspace "7"; }
+    Mod+Shift+8 { move-column-to-workspace "8"; }
+    Mod+Shift+9 { move-column-to-workspace "9"; }
+
 
 
     // Mod+1 { focus-workspace 1; }
@@ -768,19 +796,19 @@ binds {
     // Mod+3 { focus-workspace 3; }
     // Mod+4 { focus-workspace 4; }
     // Mod+5 { focus-workspace 5; }
-    Mod+6 { focus-workspace 6; }
-    Mod+7 { focus-workspace 7; }
-    Mod+8 { focus-workspace 8; }
-    Mod+9 { focus-workspace 9; }
+    // Mod+6 { focus-workspace 6; }
+    // Mod+7 { focus-workspace 7; }
+    // Mod+8 { focus-workspace 8; }
+    // Mod+9 { focus-workspace 9; }
     // Mod+Shift+1 { move-column-to-workspace 1; }
     // Mod+Shift+2 { move-column-to-workspace 2; }
     // Mod+Shift+3 { move-column-to-workspace 3; }
     // Mod+Shift+4 { move-column-to-workspace 4; }
     // Mod+Shift+5 { move-column-to-workspace 5; }
-    Mod+Shift+6 { move-column-to-workspace 6; }
-    Mod+Shift+7 { move-column-to-workspace 7; }
-    Mod+Shift+8 { move-column-to-workspace 8; }
-    Mod+Shift+9 { move-column-to-workspace 9; }
+    // Mod+Shift+6 { move-column-to-workspace 6; }
+    // Mod+Shift+7 { move-column-to-workspace 7; }
+    // Mod+Shift+8 { move-column-to-workspace 8; }
+    // Mod+Shift+9 { move-column-to-workspace 9; }
 
     // Alternatively, there are commands to move just a single window:
     // Mod+Ctrl+1 { move-window-to-workspace 1; }
@@ -880,6 +908,3 @@ binds {
     Mod+Shift+P { quit; }
 
 }
-
-include "./noctalia.kdl"
-

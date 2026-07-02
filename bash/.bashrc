@@ -9,14 +9,6 @@ alias ls='ls --color=auto'
 alias grep='grep --color=auto'
 PS1='[\u@\h \W]\$ '
 
-#export GTK_THEME=Dracula
-
-# NVM
-#source /usr/share/nvm/init-nvm.sh
-
-# GO
-#export PATH="$PATH:$(go env GOPATH)/bin"
-
 # FZF
 eval "$(fzf --bash)"
 export FZF_DEFAULT_OPTS="--height=40% --layout=reverse --border --preview 'bat --style=numbers --color=always {} | head -500'"
@@ -25,33 +17,14 @@ export FZF_DEFAULT_OPTS="--height=40% --layout=reverse --border --preview 'bat -
 export BROWSER="vivaldi-stable"
 
 # Editor
-export EDITOR="doom-now"
+# export EDITOR="doom-now"
 
 # Aliases
 alias cmacs='emacsclient -c -a ""'
 alias tmacs='emacsclient -t'
 # alias doom-reload='doom sync && pkill -f emacs && sleep 1 && emacs --daemon'
 
-alias nano='micro'
-alias ..='cd ..'
-alias ...='cd ../..'
-alias l='ls -lah'
-alias ll='ls -l'
-alias la='ls -A'
-alias mkdir='mkdir -pv'
-alias rm='rm -i'
-alias rmrf='rm -Irv'
-
-alias ffc='fastfetch'
-
-alias untar='tar -xzvf'
-
-alias reload='source ~/.bashrc'
-alias ebrc='micro ~/.bashrc'
-alias reboot='sudo reboot'
-
 alias rapps='update-desktop-database ~/.local/share/applications'
-
 alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 alias venv='python -m venv .venv && source .venv/bin/activate'
 
@@ -113,15 +86,15 @@ doomd-status() {
     echo "Doom daemon is down."
   fi
 }
-
-# Open a terminal frame (TTY)
-alias doomt='emacsclient -t -s doom'
-
-# Open a GUI frame
-alias doomc='emacsclient -c -n -s doom'
-
-# One-shot, no daemon: run Doom in the terminal right now
-alias doom-now='emacs --init-directory="$DOOM_INIT" -nw'
+# 
+# # Open a terminal frame (TTY)
+# alias doomt='emacsclient -t -s doom'
+# 
+# # Open a GUI frame
+# alias doomc='emacsclient -c -n -s doom'
+# 
+# # One-shot, no daemon: run Doom in the terminal right now
+# alias doom-now='emacs --init-directory="$DOOM_INIT" -nw'
 
 # Created by `pipx` on 2025-08-06 21:41:24
 export PATH="$PATH:/home/atlas/.local/bin"

@@ -1,142 +1,24 @@
 {
-  "layer": "top",
-  "position": "top",
-  "modules-left": [
-    "ext/workspaces",
-    // "custom/sep",
-    // "dwl/window#layout",
-    // "custom/sep",
-    "dwl/window#title"
-  ],
-  "modules-center": [
-  ],
-  "modules-right": [
-    //"mpris",
-    //"privacy",
-    //"keyboard-state",
-    "custom/sep",
-    "custom/mic",
-    "custom/sep",
-    "pulseaudio",
-    "custom/sep",
-    "battery",
-    "custom/sep",
-    "network",
-    "custom/sep",
-    "temperature",
-    "custom/sep",
-    "cpu",
-    "custom/sep",
-    "memory",
-    "custom/sep",
-    "disk",
-    "custom/sep",
-    "clock",
-    "custom/sep",
-    "tray"
-  ],
-  "mpris": {
-    "format": "{player_icon} [  ]",              // playing
-    "format-paused": "[  ]",       // paused
-    "tooltip": true,
-    "on-click": "playerctl play-pause",
-    "on-click-right": "playerctl next",
-    "on-scroll-up": "playerctl previous",
-    "on-scroll-down": "playerctl next"
-  },
-  "pulseaudio": {
-    "format": "{volume}% {icon}",
-    "format-muted": "{volume}% 󰝟",
-    "format-icons": ["", "", ""],
-    "tooltip": true,
-    "on-scroll-up": "pamixer -i 5",
-    "on-scroll-down": "pamixer -d 5",
-    "on-click": "pamixer -t"
-  },
-  "custom/mic": {
-    "format": "{}",
-    "exec": "sh -c 'muted=$(pamixer --default-source --get-mute); vol=$(pamixer --default-source --get-volume); if [ \"$muted\" = \"true\" ]; then echo \"${vol}% \"; else echo \"${vol}% \"; fi'",
-    "interval": 2,
-    "on-click": "pamixer --default-source -t",
-    "on-scroll-up": "pamixer --default-source -i 5",
-    "on-scroll-down": "pamixer --default-source -d 5",
-    "tooltip": "Mic (click: mute, scroll: volume)"
-  },
-  "privacy": {
-  "icon-spacing": 4,
-  "icon-size": 12,
-  "modules": [
-    { "type": "screenshare", "tooltip": true },
-    { "type": "audio-out",   "tooltip": true },
-    { "type": "audio-in",    "tooltip": true }
-  ]
-},
-  "temperature": {
-    "thermal-zone": 0,      // try 0, 1, 2 if unsure
-    "hwmon-path": "/sys/class/hwmon/hwmon0/temp1_input",
-    "format": "{temperatureC}°C",
-    "critical-threshold": 80
-  },
-"keyboard-state": {
-  "format": "{icon}",
-  "capslock": true,
-  "numlock": true,
-  "scrolllock": false
-},
-  "clock": {
-    "format": "{:%Y-%m-%d %H:%M}",
-    "format-alt": "{:%a %m-%d-%y %H:%M}",
-    "tooltip-format": "<big>{:%B %Y}</big>\n{calendar}"
-  },
-  "cpu": {
-    "format": "{usage}% ",
-    "interval": 5,
-    "tooltip": true,
-    "on-click": "alacritty -e cpu-auto",
-  },
-  "memory": {
-    "format": "{used}GiB ",
-    "interval": 5,
-    "tooltip": true,
-    "on-click": "alacritty -e btop",
-  },
-  "disk": {
-    "interval": 60,
-    "path": "/",
-    "format": "{free} 󰋊",
-    "on-click": "xdg-open ~"
-  },
-  "battery": {
-    "states": {
-      "good": 95,
-      "warning": 30,
-      "critical": 15
-    },
-    "format": "{capacity}% {icon}",
-    "format-charging": "{capacity}% ",
-    "format-icons": ["", "", "", "", ""]
-  },
-  "network": {
-    "format": "Online",
-    "format-disconnected": "Disconnected ⚠"
-  },
-  "ext/workspaces": {
-    "format": "{icon}",
-    "ignore-hidden": false,
-    "on-click": "activate",
-    "sort-by-id": true
-  },
-  "dwl/tags": {
-    "num-tags": 9
-  },
-  "dwl/window#layout": {
-    "format": "[{layout}]"
-  },
-  "dwl/window#title": {
-    "format": "{title}"
-  },
-  "custom/sep": {
-    "format": "|",
-    "interval": 0
-  }
+    "layer": "top",
+    "position": "bottom",
+    "height": 18,
+    //"exclusive": true,
+    //"fixed-center": false,
+    "modules-left": [],
+    "modules-center": [
+      "wlr/taskbar"
+    ],
+    "modules-right": [],
+    "wlr/taskbar": {
+        "format": "{title}",
+        "tooltip-format": "{app_id}\n{title}",
+        "all-outputs": false,
+
+        "active-first": false,
+        "sort-by-app-id": false,
+
+        "on-click": "activate",
+        "on-click-middle": "close",
+        "on-click-right": "minimize-raise"
+    }
 }

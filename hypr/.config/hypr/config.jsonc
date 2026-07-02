@@ -1,21 +1,18 @@
 {
   "layer": "top",
   "position": "top",
-  "reload_style_on_change": true,
   "modules-left": [
     "hyprland/workspaces",
-    "custom/sep",
-    "hyprland/submap",
-    "custom/sep",
     "hyprland/window"
   ],
   "modules-center": [
   ],
   "modules-right": [
-    "mpris",
     "privacy",
-//    "keyboard-state",
+    "tray",
+    // "mpris",
     "custom/sep",
+    //"custom/sep",
     "custom/mic",
     "custom/sep",
     "pulseaudio",
@@ -32,12 +29,20 @@
     "custom/sep",
     "disk",
     "custom/sep",
-    "clock",
-    "custom/sep",
-    "tray"
+    "clock"
+    // "custom/sep",
   ],
+  "hyprland/workspaces": {
+    "on-click": "activate",
+    "sort-by": "number",
+    "all-outputs": false,
+    "active-only": false,
+    "persistent-workspaces": {
+        "*": [1,2,3,4,5,6,7,8,9]
+    }
+  },
   "mpris": {
-    "format": "{player_icon} [  ]",              // playing
+    "format": "[  ]",              // playing
     "format-paused": "[  ]",       // paused
     "tooltip": true,
     "on-click": "playerctl play-pause",
@@ -47,8 +52,8 @@
   },
   "pulseaudio": {
     "format": "{volume}% {icon}",
-    "format-muted": "{volume}% 󰖁",
-    "format-icons": ["󰕿", "󰖀", "󰕾"],
+    "format-muted": "{volume}% 󰝟",
+    "format-icons": ["", "", ""],
     "tooltip": true,
     "on-scroll-up": "pamixer -i 5",
     "on-scroll-down": "pamixer -d 5",
@@ -64,7 +69,7 @@
     "tooltip": "Mic (click: mute, scroll: volume)"
   },
   "privacy": {
-      "icon-spacing": 4,
+      "icon-spacing": 8,
       "icon-size": 12,
       "modules": [
           { "type": "screenshare", "tooltip": true },
@@ -78,26 +83,25 @@
     "format": "{temperatureC}°C",
     "critical-threshold": 80
   },
-"keyboard-state": {
-  "format": "{icon}",
-  "capslock": true,
-  "numlock": true,
-  "scrolllock": false
-},
+  "keyboard-state": {
+    "format": "{icon}",
+    "capslock": true,
+    "numlock": true,
+    "scrolllock": false
+  },
   "clock": {
-    "format": "{:%Y-%m-%d %H:%M}",
-    "format-alt": "{:%a %m/%d/%y %H:%M}",
+    "format": "{:%a %m-%d-%y %H:%M}",
+    "format-alt": "{:%a %m-%d-%y %H:%M}",
     "tooltip-format": "<big>{:%B %Y}</big>\n{calendar}"
   },
   "cpu": {
-    "format": "{usage}% ",
+    "format": "{usage}%",
     "interval": 5,
     "tooltip": true,
-    "on-click": "alacritty -e cpu-auto"
+    //"on-click": "alacritty -e cpu-auto"
   },
   "memory": {
-    // "format": "{used:.1f}<small> GiB</small> ",
-    "format": "{used:.1f}<small> GiB</small> ",
+    "format": "{used}GiB",
     "interval": 5,
     "tooltip": true,
     "on-click": "alacritty -e btop"
@@ -105,14 +109,14 @@
   "disk": {
     "interval": 60,
     "path": "/",
-    "format": "{free} 󰋊",
-    "on-click": "xdg-open ~"
+    "format": "{free}",
+    "on-click": "thunar ~"
   },
   "battery": {
     "states": {
       "good": 95,
-      "warning": 30,
-      "critical": 15
+      "warning": 20,
+      "critical": 10
     },
     "format": "{capacity}% {icon}",
     "format-charging": "{capacity}% ",
@@ -120,22 +124,22 @@
   },
   "network": {
     "format": "Online",
-    "format-disconnected": "Disconnected ⚠"
+    "format-disconnected": "Disconnected"
   },
-  "hyprland/workspaces": {
-      "format": "{id}",
-      "sort-by": "number",
-      "all-outputs": false,
-      "persistent-workspaces": {
-          "*": [1,2,3,4,5,6,7,8,9]
-      },
-      "ignore-workspaces": ["^99$"]
+  "ext/workspaces": {
+    "format": "{icon}",
+    "ignore-hidden": false,
+    "on-click": "activate",
+    "sort-by-id": true
   },
-  "hyprland/submap": {
-    "format": "{}",
-    "always-on": true,
-    "default-submap": "[]=",
-    "tooltip": false
+  "dwl/tags": {
+    "num-tags": 9
+  },
+  "dwl/window#layout": {
+    "format": "[{layout}]"
+  },
+  "dwl/window#title": {
+    "format": "{title}"
   },
   "custom/sep": {
     "format": "|",

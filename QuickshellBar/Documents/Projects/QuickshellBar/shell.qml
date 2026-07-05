@@ -3,6 +3,7 @@ import Quickshell.Io
 import QtQuick
 import Quickshell.Services.SystemTray
 import Quickshell.Widgets
+import Quickshell.Services.Notifications
 
 ShellRoot {
     id: root
@@ -17,6 +18,41 @@ ShellRoot {
     property int barHeight: 13
     property int fontSize: 12
     property string statsText: ""
+    property string privacyText: ""
+
+    property string notificationText: ""
+    property int notificationCount: 0
+
+    /* NotificationServer { */
+    /*     id: notificationServer */
+
+    /*     // Keep it simple first. */
+    /*     bodySupported: true */
+    /*     bodyMarkupSupported: false */
+    /*     imageSupported: false */
+    /*     actionsSupported: false */
+    /*     persistenceSupported: true */
+
+    /*     onNotification: function(notification) { */
+    /*         notification.tracked = true; */
+
+    /*         root.notificationCount = notificationServer.trackedNotifications.count; */
+
+    /*         var app = notification.appName || ""; */
+    /*         var summary = notification.summary || ""; */
+    /*         var body = notification.body || ""; */
+
+    /*         if (app.length > 0 && summary.length > 0) { */
+    /*             root.notificationText = app + ": " + summary; */
+    /*         } else if (summary.length > 0) { */
+    /*             root.notificationText = summary; */
+    /*         } else if (body.length > 0) { */
+    /*             root.notificationText = body; */
+    /*         } else { */
+    /*             root.notificationText = "notification"; */
+    /*         } */
+    /*     } */
+    /* } */
 
     QtObject {
         id: niri
@@ -305,7 +341,7 @@ ShellRoot {
     Process {
         id: statsProc
 
-        command: ["/home/atlas/Documents/Projects/QuickshellBar/qbar-stats.sh"]
+        command: ["./qbar-stats.sh"]
 
         stdout: SplitParser {
             onRead: function(data) {
@@ -324,11 +360,34 @@ ShellRoot {
         }
     }
 
+    Process {
+        id: privacyProc
+
+        command: ["./qbar-privacy.py"]
+
+        stdout: SplitParser {
+            onRead: function(data) {
+                root.privacyText = data.trim();
+            }
+        }
+    }
+
+    Timer {
+        interval: 1000
+        running: true
+        repeat: true
+
+        onTriggered: {
+            privacyProc.running = false;
+            privacyProc.running = true;
+        }
+    }
+
     Component.onCompleted: {
         statsProc.running = true;
+        privacyProc.running = true;
     }
     
-
     PanelWindow {
         id: bar
         
@@ -411,6 +470,7 @@ ShellRoot {
 
                 anchors.left: workspaceRow.right
                 anchors.right: trayRow.left
+                // anchors.right: notificationLabel.left
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
 
@@ -443,10 +503,55 @@ ShellRoot {
 
             
             // Right
+            /* Text { */
+            /*     id: notificationLabel */
+
+            /*     anchors.right: trayRow.left */
+            /*     // anchors.rightMargin: 4 */
+            /*     anchors.top: parent.top */
+            /*     anchors.bottom: parent.bottom */
+
+            /*     visible: root.notificationCount > 0 */
+
+            /*     text: "N" + String(root.notificationCount) + " | " + root.notificationText */
+            /*     color: root.fg */
+
+            /*     font.family: root.fontName */
+            /*     font.pixelSize: root.fontSize */
+            /*     renderType: Text.NativeRendering */
+
+            /*     horizontalAlignment: Text.AlignRight */
+            /*     verticalAlignment: Text.AlignVCenter */
+
+            /*     elide: Text.ElideLeft */
+
+            /*     MouseArea { */
+            /*         anchors.fill: parent */
+            /*         acceptedButtons: Qt.LeftButton | Qt.RightButton */
+
+            /*         onClicked: function(mouse) { */
+            /*             if (mouse.button === Qt.RightButton) { */
+            /*                 var i = 0; */
+
+            /*                 while (i < notificationServer.trackedNotifications.count) { */
+            /*                     var n = notificationServer.trackedNotifications.get(i); */
+            /*                     if (n) { */
+            /*                         n.dismiss(); */
+            /*                     } */
+            /*                     i = i + 1; */
+            /*                 } */
+
+            /*                 root.notificationCount = 0; */
+            /*                 root.notificationText = ""; */
+            /*             } */
+            /*         } */
+            /*     } */
+            /* } */
+            
             Row {
                 id: trayRow
 
-                anchors.right: statsLabel.left 
+                anchors.right: privacyLabel.left
                 anchors.rightMargin: 4
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
@@ -508,6 +613,24 @@ ShellRoot {
                 }
             }
 
+            Text {
+                id: privacyLabel
+
+                anchors.right: statsLabel.left
+                anchors.rightMargin: 4
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+
+                text: root.privacyText.length > 0 ? root.privacyText + " |" : ""
+                color: root.red
+
+                font.family: root.fontName
+                font.pixelSize: root.fontSize
+                renderType: Text.NativeRendering
+
+                horizontalAlignment: Text.AlignRight
+                verticalAlignment: Text.AlignVCenter
+            }
 
             Text {
                 id: statsLabel

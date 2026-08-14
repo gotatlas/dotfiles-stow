@@ -393,6 +393,7 @@ ShellRoot {
         
         anchors {
             top: true
+            //bottom: true
             left: true
             right: true
         }

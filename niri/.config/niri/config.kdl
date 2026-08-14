@@ -35,7 +35,7 @@ cursor {
 }
 
 overview {
-    zoom 0.3 // default
+    zoom 0.25 // default
     // backdrop-color "#1E1F29"
     // backdrop-color "#20222B"
     // backdrop-color "#1A1B23"
@@ -158,15 +158,15 @@ gestures {
 }
 
 //workspace "zero"
-workspace "9"
-workspace "8"
-workspace "7"
-workspace "6"
-workspace "5"
-workspace "4"
-workspace "3"
-workspace "2"
-workspace "1"
+//workspace "9"
+//workspace "8"
+//workspace "7"
+//workspace "6"
+//workspace "5"
+//workspace "4"
+//workspace "3"
+//workspace "2"
+//workspace "1"
 
 // binds {
 //   Mod+1 { focus-workspace "one"; }
@@ -182,7 +182,8 @@ workspace "1"
 // https://yalter.github.io/niri/Configuration:-Layout
 layout {
     // Set gaps around windows in logical pixels.
-    gaps 1
+    // gaps 1
+    gaps 0    
 
     // When to center a column when changing focus, options are:
     // - "never", default behavior, focusing an off-screen column will keep at the left
@@ -232,7 +233,7 @@ layout {
     // You can change how the focus ring looks.
     focus-ring {
         // Uncomment this line to disable the focus ring.
-        // off
+        off
 
         // How many logical pixels the ring extends out from the windows.
         width 1
@@ -742,7 +743,7 @@ binds {
     // Similarly, you can bind touchpad scroll "ticks".
     // Touchpad scrolling is continuous, so for these binds it is split into
     // discrete intervals.
-    // These binds are also affected by touchpad's natural-scroll, so these
+    // These binds are also affected by touchpad''s natural-scroll, so these
     // example binds are "inverted", since we have natural-scroll enabled for
     // touchpads by default.
     // Mod+TouchpadScrollDown { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.02+"; }
@@ -756,16 +757,16 @@ binds {
     //
     // For example, with 2 workspaces + 1 empty, indices 3, 4, 5 and so on
     // will all refer to the 3rd workspace.
-    Mod+0 { focus-workspace 1;}
-    Mod+1 { focus-workspace "1";}
-    Mod+2 { focus-workspace "2";}
-    Mod+3 { focus-workspace "3";}
-    Mod+4 { focus-workspace "4";}
-    Mod+5 { focus-workspace "5";}
-    Mod+6 { focus-workspace "6";}
-    Mod+7 { focus-workspace "7";}
-    Mod+8 { focus-workspace "8";}
-    Mod+9 { focus-workspace "9";}
+    // Mod+0 { focus-workspace 1;}
+    Mod+1 { focus-workspace 1;}
+    Mod+2 { focus-workspace 2;}
+    Mod+3 { focus-workspace 3;}
+    Mod+4 { focus-workspace 4;}
+    Mod+5 { focus-workspace 5;}
+    Mod+6 { focus-workspace 6;}
+    Mod+7 { focus-workspace 7;}
+    Mod+8 { focus-workspace 8;}
+    Mod+9 { focus-workspace 9;}
     // Mod+Shift+0 { move-column-to-workspace 1; }
     // Mod+Shift+1 { move-column-to-workspace "one"; }
     // Mod+Shift+2 { move-column-to-workspace "two"; }
@@ -778,16 +779,16 @@ binds {
     // Mod+3 { focus-workspace 3;}
     // Mod+4 { focus-workspace 4;}
     // Mod+5 { focus-workspace 5;}
-    Mod+Shift+0 { move-column-to-workspace 1; }
-    Mod+Shift+1 { move-column-to-workspace "1"; }
-    Mod+Shift+2 { move-column-to-workspace "2"; }
-    Mod+Shift+3 { move-column-to-workspace "3"; }
-    Mod+Shift+4 { move-column-to-workspace "4"; }
-    Mod+Shift+5 { move-column-to-workspace "5"; }
-    Mod+Shift+6 { move-column-to-workspace "6"; }
-    Mod+Shift+7 { move-column-to-workspace "7"; }
-    Mod+Shift+8 { move-column-to-workspace "8"; }
-    Mod+Shift+9 { move-column-to-workspace "9"; }
+    // Mod+Shift+0 { move-column-to-workspace 1; }
+    Mod+Shift+1 { move-column-to-workspace 1; }
+    Mod+Shift+2 { move-column-to-workspace 2; }
+    Mod+Shift+3 { move-column-to-workspace 3; }
+    Mod+Shift+4 { move-column-to-workspace 4; }
+    Mod+Shift+5 { move-column-to-workspace 5; }
+    Mod+Shift+6 { move-column-to-workspace 6; }
+    Mod+Shift+7 { move-column-to-workspace 7; }
+    Mod+Shift+8 { move-column-to-workspace 8; }
+    Mod+Shift+9 { move-column-to-workspace 9; }
 
 
 
